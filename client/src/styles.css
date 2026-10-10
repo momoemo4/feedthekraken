@@ -1292,3 +1292,92 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
   .owned-office i { width: 40px; height: 40px; font-size: 21px; }
   .owned-office b { padding: 0 6px; font-size: 9px; }
 }
+
+/* Local mat priority: officer object gets the former portfolio showcase slot. */
+.local-portfolio--compact {
+  margin-top: 7px;
+  padding: 6px 0 0;
+  border-top: 1px solid rgba(218,194,132,.17);
+  overflow: hidden;
+}
+.local-portfolio--compact header { height: 16px; font-size: 8px; }
+.local-portfolio--compact > div {
+  min-height: 23px;
+  height: 23px;
+  margin: 2px 0;
+  overflow: hidden;
+}
+.local-portfolio--compact > div small { font-size: 8px; }
+.local-portfolio--compact .resume-card { width: 18px; height: 22px; font-size: 7px; }
+.local-portfolio--compact p {
+  margin: 1px 0;
+  font-size: 7px;
+  line-height: 1.15;
+}
+
+.local-office-display {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 38px minmax(0, 1fr);
+  overflow: hidden;
+  border-color: rgba(233,207,132,.38) !important;
+  background: radial-gradient(circle at 50% 55%, rgba(137,105,47,.18), rgba(2,15,15,.42)) !important;
+}
+.local-office-display > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 11px;
+  border-bottom: 1px solid rgba(218,194,132,.18);
+  color: #a7b6ae;
+  font: 800 clamp(8px, .38vw, 10px) "DM Mono", monospace;
+  letter-spacing: .06em;
+}
+.local-office-display > header b { color: #e3c873; }
+.local-office-display .local-office-row {
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 10px;
+}
+.local-office-display .local-office-row > small {
+  align-self: center;
+  color: #667a73;
+  font: 800 10px "DM Mono", monospace;
+  text-align: center;
+}
+.local-office-display .owned-office {
+  height: 100%;
+  min-height: 0;
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding: 8px;
+}
+.local-office-display .owned-office i {
+  align-self: center;
+  justify-self: center;
+  width: clamp(86px, 56%, 126px);
+  height: clamp(86px, 10vh, 126px);
+  border: 2px solid rgba(255,240,182,.52);
+  border-radius: 50%;
+  font-size: clamp(44px, 2.8vw, 68px);
+  box-shadow: inset 0 2px rgba(255,255,255,.35), 0 9px 22px rgba(0,0,0,.38);
+}
+.local-office-display .owned-office b {
+  padding: 8px 4px 3px;
+  font-size: clamp(12px, .58vw, 16px);
+  text-align: center;
+}
+
+@media (max-height: 900px) {
+  .local-portfolio--compact { margin-top: 4px; padding-top: 3px; }
+  .local-portfolio--compact header { height: 13px; font-size: 6px; }
+  .local-portfolio--compact > div { min-height: 17px; height: 17px; margin: 1px 0; }
+  .local-portfolio--compact > div small, .local-portfolio--compact p { font-size: 6px; }
+  .local-portfolio--compact .resume-card { width: 13px; height: 16px; font-size: 5px; }
+  .local-office-display { grid-template-rows: 30px minmax(0, 1fr); }
+  .local-office-display .local-office-row { padding: 6px; }
+  .local-office-display .owned-office { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; padding: 5px; }
+  .local-office-display .owned-office i { width: 70px; height: 70px; font-size: 36px; }
+  .local-office-display .owned-office b { padding: 4px 2px 1px; font-size: 10px; }
+}

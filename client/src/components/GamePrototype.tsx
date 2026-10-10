@@ -1118,9 +1118,10 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <strong>{viewer.name}</strong>
           <button className="private-peek" type="button"><i>◉</i> {viewer.faction.replaceAll("_", " ")}</button>
           <div className="local-token-row"><span title="Guns">● <b>{viewer.guns}</b></span>{viewer.beer > 0 && <span className="local-beer-marker" title="Beer · Off-Duty">◆ <b>OFF DUTY</b></span>}</div>
-          <div className="local-office-row">
-            {viewerRoles.map((role) => <span className={`owned-office owned-office--${role}`} key={role}><i>{role === "captain" ? "♛" : role === "lieutenant" ? "◆" : "✦"}</i><b>{role === "captain" ? "CAPTAIN HAT" : role.toUpperCase()}</b></span>)}
-            {!viewerRoles.length && <small>NO OFFICE</small>}
+          <div className="local-portfolio local-portfolio--compact">
+            <header><span>PUBLIC PORTFOLIO</span><b>{viewer.resume.length}</b></header>
+            <div>{viewer.resume.length ? viewer.resume.map((card) => <span className={`resume-card resume-card--${card.direction.toLowerCase()}`} title={card.name} key={card.id}>{card.direction[0]}</span>) : <small>No played cards yet</small>}</div>
+            <p>Captain <b>{captain.name}</b></p><p>Lieutenant <b>{lieutenant?.name ?? "Unassigned"}</b></p><p>Navigator <b>{navigator?.name ?? "Unassigned"}</b></p>
           </div>
         </div>
 
@@ -1129,11 +1130,13 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <button type="button" disabled={viewer.characterUsed || !canControlViewer} onClick={toggleCharacter}>{viewer.characterUsed ? "USED" : "REVEAL / ACTIVATE"}</button>
         </div>
 
-        <div className="local-portfolio">
-          <header><span>PUBLIC PORTFOLIO</span><b>{viewer.resume.length}</b></header>
-          <div>{viewer.resume.length ? viewer.resume.map((card) => <span className={`resume-card resume-card--${card.direction.toLowerCase()}`} title={card.name} key={card.id}>{card.direction[0]}</span>) : <small>No played cards yet</small>}</div>
-          <p>Captain <b>{captain.name}</b></p><p>Lieutenant <b>{lieutenant?.name ?? "Unassigned"}</b></p><p>Navigator <b>{navigator?.name ?? "Unassigned"}</b></p>
-        </div>
+        <section className="local-office-display" aria-label="Your officer object">
+          <header><span>YOUR OFFICER OBJECT</span><b>{viewerRoles.length ? "ON YOUR TABLE" : "NONE"}</b></header>
+          <div className="local-office-row">
+            {viewerRoles.map((role) => <span className={`owned-office owned-office--${role}`} key={role}><i>{role === "captain" ? "♛" : role === "lieutenant" ? "◆" : "✦"}</i><b>{role === "captain" ? "CAPTAIN HAT" : `${role.toUpperCase()} BADGE`}</b></span>)}
+            {!viewerRoles.length && <small>NO HAT OR BADGE</small>}
+          </div>
+        </section>
 
         <section className={`local-phase-panel ${showingPrivateHand ? "is-hand-zone" : ""}`}>
           <header><span>{showingPrivateHand ? "🂠 YOUR PRIVATE HAND" : "▶ CURRENT ACTION"}</span><b>{PHASE_LABELS[game.phase]}</b></header>
