@@ -1,4 +1,5 @@
 import type { PrivateGameView, PublicGameView } from "./types";
+import type { ClientGameCommand } from "./commands";
 
 export interface ClientToServerEvents {
   "room:subscribe": (payload: { roomCode: string; sessionToken: string }) => void;
@@ -7,7 +8,7 @@ export interface ClientToServerEvents {
     sessionToken: string;
     commandId: string;
     expectedStateVersion: number;
-    command: unknown;
+    command: ClientGameCommand;
   }) => void;
 }
 

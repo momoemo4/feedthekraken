@@ -5,11 +5,11 @@ Status date: 2026-10-10. `TESTED` is added only after the command has actually p
 | Subsystem | Status | Notes |
 | --- | --- | --- |
 | TypeScript workspace | IMPLEMENTED / TESTED | React/Vite client, Express/Socket.IO server, shared contracts; typecheck and production build passed. |
-| Server-authoritative reducer boundary | IMPLEMENTED | Rejects stale versions; gameplay commands intentionally remain closed. |
+| Server-authoritative reducer boundary | IMPLEMENTED / TESTED | Authenticated, versioned and idempotent commands cover officer appointments, team confirmation, private Mutiny commitments/locking, simultaneous reveal and Reaction pass barrier. Resolution tie-break rules remain deliberately closed. |
 | Secure and seeded RNG | IMPLEMENTED / TESTED | Cryptographic production RNG and deterministic test RNG. |
 | Public/private selectors | IMPLEMENTED / TESTED | Explicit allowlist projections; hidden state is excluded from public output. |
 | SQLite room persistence | IMPLEMENTED / TESTED | Versioned JSON snapshots behind a repository. No lobby writes yet. |
-| Socket authorization shell | IMPLEMENTED | Session-token lookup before private view emission. |
+| Socket authorization shell | IMPLEMENTED / TESTED | Session-token lookup, runtime command parsing, per-room serialization, persistence, public room broadcasts and per-session private emissions. |
 | Long Journey flat-top renderer | IMPLEMENTED / TESTED | Axial-to-pixel formula and SVG polygons. |
 | Reference-photo overlay | IMPLEMENTED | Supplied Long Journey photo is preloaded in the local audit build; replacements remain browser-local. |
 | Hex audit editor/export | IMPLEMENTED | Edges, targets, action, region, notes, and per-cell audit state. |
@@ -25,7 +25,8 @@ Status date: 2026-10-10. `TESTED` is added only after the command has actually p
 | 11-seat assisted tabletop prototype | IMPLEMENTED / LOCAL | Playable browser vertical slice for roles, Mutiny barriers, Navigation hands/Logbook, movement, card/Ritual phases, correction controls, and event history. Multiplayer server wiring remains TODO. |
 | Prototype Navigation/Ritual art wiring | IMPLEMENTED / TESTED / LOCAL | Navigation face/back crops use atlas v3 in private hands, Logbook, reveal, deck and Deep Sea; Ritual face crops use atlas v3 for active/used cards. HTML owns labels/tooltips, and local seat switching hides private card faces from non-owners. |
 | Responsive tabletop and Character presentation | IMPLEMENTED / TESTED / LOCAL | Five-zone private dock prevents action/token/log overlap on desktop and laptop breakpoints; the viewer's Gun supply is a prominent physical object with event/card −/+ controls; 22 original Character portraits use an atlas, while ability copy appears on hover or keyboard focus. |
-| Wooden tabletop objects | IMPLEMENTED / TESTED / LOCAL | Original hand-painted wooden atlas supplies a readable pirate tricorn Captain hat, Lieutenant and Navigator badges, flintlock Gun, Beer and ship pieces. Placeholder crown/diamond/star/dot glyphs were removed from the main ownership surfaces. |
+| Wooden tabletop objects | IMPLEMENTED / TESTED / LOCAL | Original hand-painted atlas v3 supplies a naval Captain tricorne with anchor (no pirate skull), five-point Lieutenant star, Navigator helm wheel, flintlock Gun, Beer and ship pieces. |
+| Sea-map fit and Character card | IMPLEMENTED / TESTED / LOCAL | The sea art now meets its frame without a decorative dead border, receives more of the laptop viewport, and uses a larger near-static ship token. Character portraits keep their square source ratio inside a redesigned horizontal card; rules remain hover/focus-only. |
 | Quick Journey | TODO / UNVERIFIED | Requires a clear reference image. |
 
 ## Milestone boundary
@@ -34,12 +35,13 @@ This repository implements Milestone 0 and the audit tooling portion of Mileston
 
 ## Last validation
 
-- `npm test`: 7 files, 25 tests passed.
+- `npm test`: 8 files, 30 tests passed.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
 - Browser flow QA: Captain/Lieutenant private hands, hidden non-owner views, shuffled Navigator Logbook, public reveal, active Ritual, used Ritual pile, and atlas crop loading verified.
 - Responsive browser QA: 1280×720 and 1920×1080 reported zero body overflow; all five private-dock regions and rail Character cards stayed within their parents; Character ability focus reveal and Gun 3→2→3 adjustment passed.
-- Wooden-object browser QA: atlas URL/crop positions verified for shared supplies, seat tokens, mini officer markers, and the local Captain hat; the old Captain crown text node is absent.
+- Latest responsive browser QA: at 1280×720 the table is 512px tall and private mat 158px tall with body exactly 1280×720; at 1920×1080 body remained exactly viewport-sized. Sea-map zoom, larger ship, square portrait crop and horizontal Character card were visually inspected.
+- Wooden-object browser QA: atlas v3 crop positions verified for the anchor Captain hat, Lieutenant star, Navigator helm wheel, shared supplies and local officer object.
 - Local client: HTTP 200.
 - Local API health: `{ "ok": true, "milestone": 1, "mapVerified": false }`.
 - `npm run simulate:8p`: 9-round deterministic game completed; public-secret leak audit passed.

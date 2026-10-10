@@ -25,7 +25,10 @@ app.get("/api/maps/long-journey", (_request, response) => {
   response.json(longJourney);
 });
 
-registerSockets(io, (roomCode) => repository.findByCode(roomCode));
+registerSockets(io, {
+  loadRoom: (roomCode) => repository.findByCode(roomCode),
+  saveRoom: (state) => repository.save(state),
+});
 
 const host = process.env.HOST ?? "127.0.0.1";
 

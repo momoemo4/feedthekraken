@@ -5,7 +5,7 @@ import { gameState } from "./fixtures";
 const forbiddenKeys = [
   "sessionToken", "originalFaction", "currentFaction", "characterState", "character", "navigationCards",
   "convertible", "pendingConversionTargetId", "mutinyCommitments", "rngSeedAudit", "internalEvents",
-  "drawPile", "discardPile", "ritualDeck", "hostPlayerId",
+  "drawPile", "discardPile", "ritualDeck", "hostPlayerId", "processedCommandIds", "mutinyThreshold",
 ];
 
 function collectKeys(value: unknown, keys = new Set<string>()): Set<string> {

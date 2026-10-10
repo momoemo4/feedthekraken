@@ -11,7 +11,18 @@ export type Phase =
   | "SETUP_CHARACTERS"
   | "ROUND_APPOINT_TEAM"
   | "MUTINY_COMMIT"
+  | "MUTINY_REACTION"
+  | "MUTINY_RESOLUTION"
+  | "CAPTAIN_TRANSFER"
+  | "DISCUSSION"
   | "NAV_CAPTAIN_DRAW"
+  | "NAV_LIEUTENANT_DRAW"
+  | "NAVIGATOR_CHOOSE"
+  | "EMERGENCY_NAVIGATOR"
+  | "MAP_ACTION"
+  | "NAVIGATION_EFFECT"
+  | "RITUAL"
+  | "ROUND_END"
   | "GAME_OVER";
 
 export interface PublicPlayer {
@@ -55,8 +66,13 @@ export interface GameState {
   roomCode: string;
   stateVersion: number;
   phase: Phase;
+  round: number;
   hostPlayerId: PlayerId | null;
   players: SecretPlayer[];
+  captainId: PlayerId | null;
+  lieutenantId: PlayerId | null;
+  navigatorId: PlayerId | null;
+  pendingCaptainId: PlayerId | null;
   mapId: "LONG_JOURNEY" | "QUICK_JOURNEY";
   shipHexId: string | null;
   drawPile: string[];
@@ -66,6 +82,10 @@ export interface GameState {
   internalEvents: InternalEvent[];
   pendingConversionTargetId: PlayerId | null;
   mutinyCommitments: Record<PlayerId, number>;
+  mutinyLockedPlayerIds: PlayerId[];
+  reactionPassedPlayerIds: PlayerId[];
+  mutinyThreshold: number;
+  processedCommandIds: string[];
   rngSeedAudit: string;
 }
 
@@ -74,7 +94,12 @@ export interface PublicGameView {
   roomCode: string;
   stateVersion: number;
   phase: Phase;
+  round: number;
   players: PublicPlayer[];
+  captainId: PlayerId | null;
+  lieutenantId: PlayerId | null;
+  navigatorId: PlayerId | null;
+  pendingCaptainId: PlayerId | null;
   mapId: GameState["mapId"];
   shipHexId: string | null;
   drawPileCount: number;
@@ -82,6 +107,8 @@ export interface PublicGameView {
   ritualCardsRemaining: number;
   events: PublicEvent[];
   mutinyReadyPlayerIds: PlayerId[];
+  reactionPassedPlayerIds: PlayerId[];
+  mutinyContributions: Record<PlayerId, number> | null;
 }
 
 export interface PrivateGameView {
@@ -92,6 +119,8 @@ export interface PrivateGameView {
   navigationCards: string[];
   pirateTeammates: Array<Pick<PublicPlayer, "id" | "name" | "seat">>;
   cultLeader: Pick<PublicPlayer, "id" | "name" | "seat"> | null;
+  mutinyCommitment: number | null;
+  mutinyLocked: boolean;
   legalActions: string[];
 }
 

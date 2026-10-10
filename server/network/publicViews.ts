@@ -17,18 +17,28 @@ function toPublicPlayer(player: GameState["players"][number]): PublicPlayer {
 }
 
 export function getPublicView(gameState: GameState): PublicGameView {
+  const contributionsVisible = gameState.phase === "MUTINY_REACTION"
+    || gameState.phase === "MUTINY_RESOLUTION"
+    || gameState.phase === "CAPTAIN_TRANSFER";
   return {
     roomId: gameState.roomId,
     roomCode: gameState.roomCode,
     stateVersion: gameState.stateVersion,
     phase: gameState.phase,
+    round: gameState.round,
     players: gameState.players.map(toPublicPlayer),
+    captainId: gameState.captainId,
+    lieutenantId: gameState.lieutenantId,
+    navigatorId: gameState.navigatorId,
+    pendingCaptainId: gameState.pendingCaptainId,
     mapId: gameState.mapId,
     shipHexId: gameState.shipHexId,
     drawPileCount: gameState.drawPile.length,
     discardPileCount: gameState.discardPile.length,
     ritualCardsRemaining: gameState.ritualDeck.length,
     events: gameState.publicEvents.map((event) => ({ ...event })),
-    mutinyReadyPlayerIds: Object.keys(gameState.mutinyCommitments),
+    mutinyReadyPlayerIds: [...gameState.mutinyLockedPlayerIds],
+    reactionPassedPlayerIds: [...gameState.reactionPassedPlayerIds],
+    mutinyContributions: contributionsVisible ? { ...gameState.mutinyCommitments } : null,
   };
 }
