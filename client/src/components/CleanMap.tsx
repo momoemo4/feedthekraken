@@ -51,51 +51,26 @@ function cellTone(cell: HexCell) {
 }
 
 function ActionIcon({ action }: { action: NonNullable<HexCell["action"]> }) {
-  if (action === "CABIN_SEARCH") {
-    return (
-      <g className="clean-icon clean-icon--search">
-        <circle cx="-5" cy="-5" r="14" />
-        <path d="M5 5 19 19" />
-        <path d="M-13-5c5-5 11-6 17-2" opacity=".65" />
-      </g>
-    );
-  }
-
-  if (action === "FLOGGING") {
-    return (
-      <g className="clean-icon clean-icon--flogging">
-        <path d="M-18-14c14 3 22 12 25 29M-9-18C5-11 12-2 13 14M1-18c12 9 17 18 16 28" />
-        <path d="M-21-18-12-9" className="clean-icon__solid" />
-      </g>
-    );
-  }
-
-  if (action === "OFF_WITH_THE_TONGUE") {
-    return (
-      <g className="clean-icon clean-icon--blade">
-        <path d="M-18 13 11-16l8-3-3 9-29 28Z" />
-        <path d="m-16 5 11 11M-20 18l7-7" />
-      </g>
-    );
-  }
+  const crop: Record<NonNullable<HexCell["action"]>, [number, number]> = {
+    CABIN_SEARCH: [0, 0],
+    FLOGGING: [640, 0],
+    OFF_WITH_THE_TONGUE: [0, 640],
+    FEED_THE_KRAKEN: [640, 640],
+  };
+  const [x, y] = crop[action];
 
   return (
-    <g className="clean-icon clean-icon--kraken">
-      <circle cy="-7" r="9" />
-      <path d="M-5 0c-15 4-15 17-7 20M0 1c-8 8-6 18 0 22M5 0c15 4 15 17 7 20M-9-9c-5-8-11-5-12 1M9-9c5-8 11-5 12 1" />
-      <circle cx="-3" cy="-8" r="1.5" className="clean-icon__eye" />
-      <circle cx="3" cy="-8" r="1.5" className="clean-icon__eye" />
-    </g>
+    <svg x="-53" y="-53" width="106" height="106" viewBox={`${x} ${y} 640 640`} overflow="hidden" aria-hidden="true">
+      <image href="/art/components/map-actions-atlas-v2.png" width="1280" height="1280" preserveAspectRatio="none" />
+    </svg>
   );
 }
 
 function ShipIcon({ x, y }: { x: number; y: number }) {
   return (
     <g className="clean-ship" transform={`translate(${x} ${y})`}>
-      <ellipse cy="21" rx="38" ry="8" className="clean-ship__shadow" />
-      <path d="M-34 8h68L24 27h-48Z" className="clean-ship__hull" />
-      <path d="M0-38V9M-2-34c-20 7-26 21-26 34H-2ZM3-28c17 7 22 18 22 29H3Z" className="clean-ship__sail" />
-      <path d="M0-38 19-32 0-25Z" className="clean-ship__flag" />
+      <ellipse cy="33" rx="31" ry="9" className="clean-ship__shadow" />
+      <image href="/art/components/ship-map-token-v2.png" x="-39" y="-52" width="78" height="98" preserveAspectRatio="xMidYMid meet" />
     </g>
   );
 }
@@ -208,12 +183,8 @@ export function CleanMap({
 
               {cell.action && cell.action !== "FEED_THE_KRAKEN" && (
                 <g className="clean-token" transform={`translate(${center.x} ${center.y - 8})`}>
-                  <ellipse cy="12" rx="32" ry="11" className="clean-token__shadow" />
-                  <circle r="31" className="clean-token__wood-rim" />
-                  <circle r="26" className="clean-token__wood" />
-                  <path d="M-20-13Q0-22 20-12M-23 1Q0-7 23 2M-18 15Q0 8 18 15" className="clean-token__grain-lines" />
                   <ActionIcon action={cell.action} />
-                  <text y="43" className="clean-token__label">{ACTION_LABELS[cell.action]}</text>
+                  <text y="51" className="clean-token__label">{ACTION_LABELS[cell.action]}</text>
                 </g>
               )}
 

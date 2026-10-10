@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Feed the Kraken — Component Art Bible</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #061718;
+      --panel: rgba(7, 28, 29, .94);
+      --panel-2: rgba(12, 42, 42, .92);
+      --line: rgba(221, 197, 126, .3);
+      --gold: #dfc274;
+      --cream: #f0e2b8;
+      --muted: #91a7a0;
+      --red: #a84a43;
+      --blue: #3f7895;
+      --yellow: #c5a83d;
+      --cult: #8e754a;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--cream);
+      background:
+        radial-gradient(circle at 50% -10%, rgba(43, 108, 112, .35), transparent 42rem),
+        linear-gradient(180deg, #081f22, #041112 38rem);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      opacity: .16;
+      background-image: url('/art/long-journey-world-v4.png');
+      background-position: top center;
+      background-size: cover;
+      filter: saturate(.75) contrast(1.1);
+      mask-image: linear-gradient(#000, transparent 68rem);
+    }
+    a { color: inherit; }
+    .report-shell { width: min(1680px, calc(100% - 32px)); margin: 0 auto; }
+    .topbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      min-height: 60px;
+      padding: 8px max(16px, calc((100vw - 1680px) / 2));
+      border-bottom: 1px solid var(--line);
+      background: rgba(3, 18, 19, .9);
+      backdrop-filter: blur(16px);
+    }
+    .topbar__brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+    .topbar__brand i { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--gold); border-radius: 50%; color: var(--ink); background: var(--gold); font: 700 20px Georgia, serif; }
+    .topbar__brand span { display: grid; }
+    .topbar__brand small, .eyebrow, .section-kicker { color: var(--gold); font: 800 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    .topbar__brand b { font: 700 16px Georgia, serif; }
+    .topbar nav { display: flex; flex-wrap: wrap; gap: 5px; }
+    .topbar nav a { padding: 8px 10px; border: 1px solid transparent; color: #aabbb4; font: 750 10px ui-monospace, SFMono-Regular, Consolas, monospace; text-decoration: none; text-transform: uppercase; }
+    .topbar nav a:hover { color: var(--cream); border-color: var(--line); background: rgba(255,255,255,.04); }
+    .back-link { padding: 9px 12px; border: 1px solid var(--line); color: var(--gold); font: 800 10px ui-monospace, SFMono-Regular, Consolas, monospace; text-decoration: none; }
+
+    .hero {
+      min-height: 520px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(460px, .95fr);
+      align-items: center;
+      gap: 58px;
+      padding: 74px 0 58px;
+    }
+    .hero h1 { max-width: 860px; margin: 15px 0 22px; font: 700 clamp(48px, 6vw, 92px)/.94 Georgia, serif; letter-spacing: -.045em; }
+    .hero h1 em { display: block; color: var(--gold); font-style: italic; font-weight: 400; }
+    .hero p { max-width: 760px; color: #b9c7c1; font-size: 17px; line-height: 1.65; }
+    .hero__facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+    .hero__facts span { padding: 9px 12px; border: 1px solid var(--line); color: #c9d3cd; background: rgba(5,25,26,.65); font: 750 10px ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .hero__atlas { position: relative; }
+    .hero__atlas img { width: 100%; display: block; border: 1px solid rgba(231,207,141,.5); box-shadow: 0 28px 70px rgba(0,0,0,.5); transform: rotate(1.25deg); }
+    .hero__atlas::after { position: absolute; right: -16px; bottom: -16px; padding: 9px 13px; content: "MASTER OBJECT ATLAS · 3×3"; color: #201b10; background: var(--gold); font: 900 10px ui-monospace, SFMono-Regular, Consolas, monospace; }
+
+    .principles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 70px; }
+    .principle { min-height: 142px; padding: 20px; border: 1px solid var(--line); background: var(--panel); }
+    .principle i { color: var(--gold); font: 400 30px Georgia, serif; }
+    .principle h3 { margin: 15px 0 8px; font: 700 17px Georgia, serif; }
+    .principle p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+
+    .report-section { scroll-margin-top: 78px; padding: 48px 0 68px; border-top: 1px solid var(--line); }
+    .section-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .55fr); gap: 40px; align-items: end; margin-bottom: 26px; }
+    .section-head h2 { margin: 10px 0 0; font: 700 clamp(34px, 4vw, 57px)/1 Georgia, serif; }
+    .section-head p { margin: 0; color: #a8b8b1; font-size: 14px; line-height: 1.65; }
+
+    .component-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .component-card { min-width: 0; display: grid; grid-template-columns: minmax(160px, 43%) minmax(0, 1fr); border: 1px solid rgba(223,198,126,.27); background: linear-gradient(145deg, rgba(11,43,42,.96), rgba(4,23,24,.97)); box-shadow: 0 14px 30px rgba(0,0,0,.19); overflow: hidden; }
+    .component-card--portrait { grid-template-columns: minmax(170px, 44%) minmax(0, 1fr); }
+    .component-card__art { min-height: 220px; border-right: 1px solid rgba(223,198,126,.24); background-repeat: no-repeat; }
+    .component-card--portrait .component-card__art { min-height: 295px; }
+    .component-card__copy { min-width: 0; padding: 17px; }
+    .component-card__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .component-card__top span, .pill { padding: 5px 7px; border: 1px solid rgba(224,198,119,.26); color: var(--gold); font: 800 8px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .06em; text-transform: uppercase; }
+    .component-card__top b { color: #9db0a9; font: 800 9px ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .component-card h3 { margin: 14px 0 9px; font: 700 22px/1.05 Georgia, serif; }
+    .component-card p { margin: 0; color: #a9b9b2; font-size: 11px; line-height: 1.55; }
+    .spec-list { display: grid; gap: 6px; margin: 15px 0 0; padding: 0; list-style: none; }
+    .spec-list li { display: grid; grid-template-columns: 68px 1fr; gap: 7px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,.055); color: #c6d1cb; font-size: 10px; line-height: 1.4; }
+    .spec-list b { color: #708980; font: 800 8px ui-monospace, SFMono-Regular, Consolas, monospace; text-transform: uppercase; }
+    .tone-red { border-top-color: var(--red); }
+    .tone-blue { border-top-color: var(--blue); }
+    .tone-yellow { border-top-color: var(--yellow); }
+    .tone-cult { border-top-color: var(--cult); }
+
+    .atlas-hardware { background-image: url('/art/components/physical-components-atlas.png'); background-size: 300% 300%; }
+    .atlas-navigation { min-height: 0; aspect-ratio: 1; background-image: url('/art/components/navigation-cards-atlas-v3.png'); background-size: 400% 200%; }
+    .atlas-ritual { background-image: url('/art/components/ritual-cards-atlas-v3.png'); background-size: 300% 100%; }
+    .atlas-actions { background-image: url('/art/components/map-actions-atlas-v2.png'); background-size: 200% 200%; }
+    .standalone-ship { background: url('/art/components/ship-map-token-v2.png') center / contain no-repeat; }
+    .standalone-beer { background: url('/art/components/beer-supply-v2.png') center / contain no-repeat; }
+    .x3-0 { background-position-x: 0; } .x3-1 { background-position-x: 50%; } .x3-2 { background-position-x: 100%; }
+    .x4-0 { background-position-x: 0; } .x4-1 { background-position-x: 33.333%; } .x4-2 { background-position-x: 66.667%; } .x4-3 { background-position-x: 100%; }
+    .x2-0 { background-position-x: 0; } .x2-1 { background-position-x: 100%; }
+    .y3-0 { background-position-y: 0; } .y3-1 { background-position-y: 50%; } .y3-2 { background-position-y: 100%; }
+    .y2-0 { background-position-y: 0; } .y2-1 { background-position-y: 100%; }
+    .y1-0 { background-position-y: 0; }
+
+    .atlas-preview { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; margin-top: 22px; padding: 14px; border: 1px solid var(--line); background: rgba(2,17,18,.72); }
+    .atlas-preview img { width: 100%; max-height: 420px; display: block; object-fit: contain; }
+    .atlas-preview__copy { width: 190px; }
+    .atlas-preview__copy strong { display: block; font: 700 20px Georgia, serif; }
+    .atlas-preview__copy span { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .atlas-preview__copy a { display: inline-block; margin-top: 14px; padding: 8px 10px; border: 1px solid var(--gold); color: var(--gold); font: 800 9px ui-monospace, SFMono-Regular, Consolas, monospace; text-decoration: none; }
+    .object-overrides { min-height: 330px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; padding: 16px; background: radial-gradient(circle, rgba(34,86,87,.45), rgba(3,18,20,.9)); }
+    .object-overrides img { width: 100%; max-height: 300px; object-fit: contain; }
+
+    .map-demo { position: relative; min-height: 420px; margin: 0 0 22px; border: 1px solid var(--line); overflow: hidden; background: url('/art/long-journey-world-v4.png') center 78% / cover; }
+    .map-demo::after { position: absolute; inset: 0; content: ""; background: radial-gradient(circle at 50% 58%, transparent 0 13%, rgba(2,18,20,.15) 36%, rgba(2,18,20,.68) 100%); pointer-events: none; }
+    .map-demo__ship { position: absolute; z-index: 2; left: 50%; top: 58%; width: 96px; translate: -50% -50%; filter: drop-shadow(0 12px 8px rgba(0,20,28,.7)); animation: report-ship-bob 3s ease-in-out infinite; }
+    .map-demo__note { position: absolute; z-index: 3; left: 18px; bottom: 18px; max-width: 360px; padding: 10px 12px; border: 1px solid var(--line); color: var(--cream); background: rgba(3,19,20,.9); font: 800 10px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    @keyframes report-ship-bob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-5px) rotate(1deg); } }
+
+    .matrix { width: 100%; border-collapse: collapse; border: 1px solid var(--line); background: var(--panel); }
+    .matrix th, .matrix td { padding: 13px 15px; border-bottom: 1px solid rgba(223,198,126,.15); text-align: left; vertical-align: top; }
+    .matrix th { color: var(--gold); background: rgba(222,195,115,.07); font: 800 9px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .matrix td { color: #adbbb5; font-size: 12px; line-height: 1.45; }
+    .matrix td:first-child { color: var(--cream); font-weight: 750; }
+    .state-auto { color: #78c799; } .state-assist { color: #e4bd68; } .state-private { color: #7cbdd0; }
+
+    .prompt-block { padding: 24px; border: 1px solid var(--line); color: #b8c6c0; background: #031415; font: 11px/1.7 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; }
+    footer { display: flex; justify-content: space-between; gap: 20px; padding: 34px 0 54px; border-top: 1px solid var(--line); color: #718780; font-size: 11px; }
+
+    @media (max-width: 1200px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero__atlas { max-width: 720px; }
+      .principles { grid-template-columns: 1fr 1fr; }
+      .component-grid { grid-template-columns: 1fr 1fr; }
+      .topbar nav { display: none; }
+    }
+    @media (max-width: 760px) {
+      .report-shell { width: min(100% - 20px, 1680px); }
+      .topbar { padding: 8px 10px; }
+      .topbar__brand b { font-size: 13px; }
+      .hero { min-height: 0; padding-top: 45px; }
+      .hero h1 { font-size: 44px; }
+      .principles, .component-grid, .section-head { grid-template-columns: 1fr; }
+      .component-card { grid-template-columns: 42% 1fr; }
+      .component-card__art { min-height: 210px; }
+      .component-card--portrait .component-card__art { min-height: 265px; }
+      .atlas-preview { grid-template-columns: 1fr; }
+      .atlas-preview__copy { width: auto; }
+      .matrix { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__brand"><i>☠</i><span><small>Feed the Kraken</small><b>Component Art Bible</b></span></div>
+    <nav aria-label="Report sections">
+      <a href="#objects">Objects</a><a href="#navigation">Navigation</a><a href="#rituals">Rituals</a><a href="#map-icons">Map icons</a><a href="#implementation">Implementation</a>
+    </nav>
+    <a class="back-link" href="/">← GAME</a>
+  </header>
+
+  <main class="report-shell">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Visual system · v1.0</span>
+        <h1>One painted world.<em>Every playable object.</em></h1>
+        <p>Bộ component mới dùng cùng ngôn ngữ hình ảnh với Long Journey map: fantasy hàng hải vẽ tay, gỗ ngấm muối, đồng xước, biển xanh ngọc tối và ánh đèn vàng. Art không chứa chữ; tên, luật và trạng thái được HTML phủ lên để luôn sắc nét, dễ dịch và không bị AI viết sai.</p>
+        <div class="hero__facts"><span>COMPLETE COMPONENT SYSTEM</span><span>6 CURRENT ART ASSETS</span><span>NO EMBEDDED TEXT</span><span>TABLETOP-FIRST</span></div>
+      </div>
+      <div class="hero__atlas"><img src="/art/components/physical-components-atlas.png" alt="Atlas of nine physical game objects" /></div>
+    </section>
+
+    <section class="principles" aria-label="Art principles">
+      <article class="principle"><i>Ⅰ</i><h3>Readable at table scale</h3><p>Silhouette lớn, tương phản mạnh; khi thu nhỏ vẫn nhận ra súng, bia, mũ và từng action.</p></article>
+      <article class="principle"><i>Ⅱ</i><h3>One physical location</h3><p>Mũ, huy hiệu và Beer chỉ xuất hiện tại khay chung hoặc trên bàn một người—không nhân đôi.</p></article>
+      <article class="principle"><i>Ⅲ</i><h3>Art and rules separated</h3><p>Ảnh chỉ chứa illustration. Tên, count, prompt và trạng thái do giao diện render.</p></article>
+      <article class="principle"><i>Ⅳ</i><h3>Manual plus assisted</h3><p>Vật thể vẫn kéo/thả được; nút tự động chỉ rút ngắn thao tác và luôn để lại log.</p></article>
+    </section>
+
+    <section class="report-section" id="objects">
+      <div class="section-head"><div><span class="section-kicker">01 · Physical table objects</span><h2>Officer objects, supply & ship</h2></div><p>Chín asset nền tảng. Ba office object chỉ có một bản; Gun là supply mở; Beer là pool hữu hạn; tàu là vị trí authoritative duy nhất trên bản đồ.</p></div>
+      <div class="component-grid">
+        <article class="component-card"><div class="component-card__art atlas-hardware x3-0 y3-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Officer</span><b>×1</b></div><h3>Captain Hat</h3><p>Mũ tam giác đen, viền dây vàng và huy hiệu Kraken. Đây là vật thể quyền lực lớn nhất trên player mat.</p><ul class="spec-list"><li><b>Owner</b><span>Current Captain</span></li><li><b>Move</b><span>Mutiny / Drunk transfer</span></li><li><b>Rule</b><span>Không bao giờ render hai nơi.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-hardware x3-1 y3-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Officer</span><b>×1</b></div><h3>Lieutenant Badge</h3><p>Men đỏ oxblood và đồng cổ; hình kim cương giúp nhận biết ngay cả khi rất nhỏ.</p><ul class="spec-list"><li><b>Owner</b><span>Chosen Lieutenant</span></li><li><b>Move</b><span>Captain drag/drop</span></li><li><b>Return</b><span>Về Captain sau Navigation.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-hardware x3-2 y3-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Officer</span><b>×1</b></div><h3>Navigator Badge</h3><p>La bàn men xanh với kim vàng; khác hẳn Lieutenant cả màu lẫn silhouette.</p><ul class="spec-list"><li><b>Owner</b><span>Chosen Navigator</span></li><li><b>Move</b><span>Captain drag/drop</span></li><li><b>Action</b><span>Chọn một lá trong Logbook.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-hardware x3-0 y3-1"></div><div class="component-card__copy"><div class="component-card__top"><span>Supply</span><b>Public</b></div><h3>Gun</h3><p>Flintlock gỗ óc chó và đồng, dùng cho Mutiny cùng các card Armed/Disarmed.</p><ul class="spec-list"><li><b>Setup</b><span>Mỗi người 3 Guns.</span></li><li><b>Mutiny</b><span>Đóng góp bí mật, reveal đồng thời.</span></li><li><b>Control</b><span>+ / − thủ công luôn khả dụng.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art standalone-beer"></div><div class="component-card__copy"><div class="component-card__top"><span>Off-Duty supply</span><b>×1–3</b></div><h3>Beer Barrel</h3><p>Thùng bia chung đặt cạnh map; các cốc gỗ chính là Off-Duty marker và rời pool khi người chơi lấy.</p><ul class="spec-list"><li><b>Pool</b><span>5–6: 1 · 7–8: 2 · 9–11: 3</span></li><li><b>Owner</b><span>Tối đa 1 mỗi người.</span></li><li><b>Empty</b><span>Hết pool thì không render cốc cạnh thùng.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art standalone-ship"></div><div class="component-card__copy"><div class="component-card__top"><span>Map piece</span><b>×1</b></div><h3>Voyage Ship</h3><p>Quân thuyền top-down trong suốt, không đế và không có mảng sóng riêng; đặt trực tiếp trên tâm hex.</p><ul class="spec-list"><li><b>State</b><span>Một shipHexId authoritative.</span></li><li><b>Motion</b><span>Animate edge-to-edge sau card.</span></li><li><b>Undo</b><span>Host correction có log.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-hardware x3-0 y3-2"></div><div class="component-card__copy"><div class="component-card__top"><span>Deck back</span><b>23</b></div><h3>Navigation Deck</h3><p>Da xanh navy nứt, góc đồng và compass rose. Không có màu hướng ở mặt sau.</p><ul class="spec-list"><li><b>Draw</b><span>Captain/Lieutenant bốc 2.</span></li><li><b>Safety</b><span>&lt;4 lá thì reshuffle trước deal.</span></li><li><b>Secret</b><span>Card face chỉ gửi đúng owner.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-hardware x3-1 y3-2"></div><div class="component-card__copy"><div class="component-card__top"><span>Deck back</span><b>5</b></div><h3>Ritual Deck</h3><p>Da than đen, trăng bạc và Kraken dập chìm; tách hẳn khỏi Navigation Deck.</p><ul class="spec-list"><li><b>Trigger</b><span>Cult Uprising.</span></li><li><b>Draw</b><span>Một lá chưa dùng.</span></li><li><b>Privacy</b><span>Thông tin secret server-side.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-hardware x3-2 y3-2"></div><div class="component-card__copy"><div class="component-card__top"><span>Container</span><b>2 slots</b></div><h3>Captain’s Logbook</h3><p>Sổ da hai ô, khóa đồng. Hai card úp được shuffle trước khi Navigator xem.</p><ul class="spec-list"><li><b>Input</b><span>1 Captain + 1 Lieutenant.</span></li><li><b>Shuffle</b><span>Ẩn nguồn của từng lá.</span></li><li><b>Output</b><span>Navigator chọn 1 để play.</span></li></ul></div></article>
+      </div>
+      <div class="atlas-preview"><img src="/art/components/physical-components-atlas.png" alt="Full physical component atlas" /><div class="atlas-preview__copy"><strong>Core physical atlas</strong><span>3×3 source atlas. Hai cell Beer/Ship cũ đã được standalone v2 bên dưới thay thế.</span><a href="/art/components/physical-components-atlas.png" download>DOWNLOAD BASE</a></div></div>
+      <div class="atlas-preview"><div class="object-overrides"><img src="/art/components/ship-map-token-v2.png" alt="Top-down map ship" /><img src="/art/components/beer-supply-v2.png" alt="Beer barrel supply" /></div><div class="atlas-preview__copy"><strong>Object overrides v2</strong><span>Ship top-down đặt trực tiếp lên hex; Beer Barrel là supply cạnh map.</span><a href="/art/components/ship-map-token-v2.png" download>SHIP PNG</a> <a href="/art/components/beer-supply-v2.png" download>BARREL PNG</a></div></div>
+    </section>
+
+    <section class="report-section" id="navigation">
+      <div class="section-head"><div><span class="section-kicker">02 · Navigation deck</span><h2>Seven restrained card faces</h2></div><p>Giấy parchment, một icon lớn và đường viền màu mỏng là đủ. Màu chỉ báo hướng di chuyển; illustration cho biết effect. Tên và luật vẫn do HTML đặt lên hai vùng trống.</p></div>
+      <div class="component-grid">
+        <article class="component-card component-card--portrait tone-yellow"><div class="component-card__art atlas-navigation x4-0 y2-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Yellow · North</span><b>×6</b></div><h3>Cult Uprising</h3><p>Sau khi tàu đi, rút và resolve một Ritual chưa dùng.</p><ul class="spec-list"><li><b>Mode</b><span class="state-auto">AUTO TRIGGER</span></li><li><b>Next</b><span>Ritual phase</span></li></ul></div></article>
+        <article class="component-card component-card--portrait tone-blue"><div class="component-card__art atlas-navigation x4-1 y2-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Blue · East</span><b>×4</b></div><h3>Drunk</h3><p>Captain tự pass theo chiều kim đồng hồ tới người hợp lệ có ít résumé nhất.</p><ul class="spec-list"><li><b>Mode</b><span class="state-auto">AUTO RESOLVE</span></li><li><b>Tie</b><span>Clockwise order</span></li></ul></div></article>
+        <article class="component-card component-card--portrait tone-blue"><div class="component-card__art atlas-navigation x4-2 y2-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Blue · East</span><b>×2</b></div><h3>Disarmed</h3><p>Navigator mất 1 Gun nếu đang có Gun.</p><ul class="spec-list"><li><b>Mode</b><span class="state-auto">AUTO RESOLVE</span></li><li><b>Floor</b><span>Không xuống dưới 0.</span></li></ul></div></article>
+        <article class="component-card component-card--portrait tone-red"><div class="component-card__art atlas-navigation x4-3 y2-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Red · West</span><b>×5</b></div><h3>Drunk</h3><p>Cùng effect với Blue Drunk nhưng tàu đi theo hướng đỏ.</p><ul class="spec-list"><li><b>Mode</b><span class="state-auto">AUTO RESOLVE</span></li><li><b>Move</b><span>Red exit first.</span></li></ul></div></article>
+        <article class="component-card component-card--portrait tone-red"><div class="component-card__art atlas-navigation x4-0 y2-1"></div><div class="component-card__copy"><div class="component-card__top"><span>Red · West</span><b>×2</b></div><h3>Mermaid</h3><p>Captain chọn người khác; người đó bí mật xem 3 lá Deep Sea gần nhất đã shuffle.</p><ul class="spec-list"><li><b>Mode</b><span class="state-assist">TARGET ASSIST</span></li><li><b>Private</b><span class="state-private">Viewer-only panel</span></li></ul></div></article>
+        <article class="component-card component-card--portrait tone-red"><div class="component-card__art atlas-navigation x4-1 y2-1"></div><div class="component-card__copy"><div class="component-card__top"><span>Red · West</span><b>×2</b></div><h3>Telescope</h3><p>Người được chọn xem lá đầu deck rồi quyết định giữ trên top hoặc discard úp.</p><ul class="spec-list"><li><b>Mode</b><span class="state-assist">PRIVATE CHOICE</span></li><li><b>Undo</b><span>Không undo sau confirm.</span></li></ul></div></article>
+        <article class="component-card component-card--portrait tone-red"><div class="component-card__art atlas-navigation x4-2 y2-1"></div><div class="component-card__copy"><div class="component-card__top"><span>Red · West</span><b>×2</b></div><h3>Armed</h3><p>Navigator nhận 1 Gun từ general supply.</p><ul class="spec-list"><li><b>Mode</b><span class="state-auto">AUTO RESOLVE</span></li><li><b>Map</b><span>Long Journey only</span></li></ul></div></article>
+        <article class="component-card component-card--portrait"><div class="component-card__art atlas-navigation x4-3 y2-1"></div><div class="component-card__copy"><div class="component-card__top"><span>Shared back</span><b>Secret</b></div><h3>Navigation Back</h3><p>Bánh lái đồng trên da nâu trung tính; dùng cho deck, hand úp và Deep Sea.</p><ul class="spec-list"><li><b>Leak</b><span>Không lộ direction/effect.</span></li><li><b>State</b><span>Face-up chỉ đúng private owner.</span></li></ul></div></article>
+      </div>
+      <div class="atlas-preview"><img src="/art/components/navigation-cards-atlas-v3.png" alt="Direction-first square Navigation Card atlas" /><div class="atlas-preview__copy"><strong>Navigation atlas v3</strong><span>4×2 card vuông · la bàn/mũi tên là chính; effect chỉ là icon nhỏ góc dưới phải.</span><a href="/art/components/navigation-cards-atlas-v3.png" download>DOWNLOAD PNG</a></div></div>
+    </section>
+
+    <section class="report-section" id="rituals">
+      <div class="section-head"><div><span class="section-kicker">03 · Cult ritual deck</span><h2>Austere, not ornamental</h2></div><p>Ritual dùng giấy than xám, mực đen và một ký hiệu duy nhất. Không khung vàng, không phép sáng, không dựng cả cảnh nhân vật; target và secret result vẫn chỉ xuất hiện trên màn Cult Leader.</p></div>
+      <div class="component-grid">
+        <article class="component-card component-card--portrait tone-cult"><div class="component-card__art atlas-ritual x3-0 y1-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Ritual</span><b>×3</b></div><h3>Conversion to Cult</h3><p>Cult Leader chọn một người convertible. Cabin-Searched/Flogged không hợp lệ; target không lộ ra bàn chung.</p><ul class="spec-list"><li><b>Mode</b><span class="state-private">SECRET TARGET</span></li><li><b>Confirm</b><span>Final; no undo.</span></li><li><b>Memory</b><span>Giữ knowledge snapshot cũ.</span></li></ul></div></article>
+        <article class="component-card component-card--portrait tone-cult"><div class="component-card__art atlas-ritual x3-1 y1-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Ritual</span><b>×1</b></div><h3>Cult’s Guns Stash</h3><p>Phân phối đúng 3 Guns; có thể dồn nhiều khẩu cho cùng một người.</p><ul class="spec-list"><li><b>Mode</b><span class="state-assist">PRIVATE ALLOCATION</span></li><li><b>Guard</b><span>Total phải bằng 3.</span></li><li><b>Result</b><span>Public totals update.</span></li></ul></div></article>
+        <article class="component-card component-card--portrait tone-cult"><div class="component-card__art atlas-ritual x3-2 y1-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Ritual</span><b>×1</b></div><h3>Cult Cabin Search</h3><p>Cult Leader bí mật xem faction hiện tại của Captain, Lieutenant và Navigator.</p><ul class="spec-list"><li><b>Mode</b><span class="state-private">PRIVATE SNAPSHOT</span></li><li><b>Public</b><span>Chỉ báo đã resolve.</span></li><li><b>Close</b><span>Không đổi state.</span></li></ul></div></article>
+      </div>
+      <div class="atlas-preview"><img src="/art/components/ritual-cards-atlas-v3.png" alt="Restrained portrait Cult Ritual Card atlas" /><div class="atlas-preview__copy"><strong>Ritual atlas v3</strong><span>3 card dọc 7:12 · charcoal parchment, symbolic ink art, rất ít màu.</span><a href="/art/components/ritual-cards-atlas-v3.png" download>DOWNLOAD PNG</a></div></div>
+    </section>
+
+    <section class="report-section" id="map-icons">
+      <div class="section-head"><div><span class="section-kicker">04 · Direct-on-map pieces</span><h2>One ship, four action markers</h2></div><p>Đây chỉ là các vật thể thực sự nằm trên mặt biển. Thuyền là một PNG top-down riêng; bốn action marker là gỗ trôi với pictogram lớn. Crest chiến thắng và đại bác đã bỏ khỏi atlas này.</p></div>
+      <div class="map-demo"><img class="map-demo__ship" src="/art/components/ship-map-token-v2.png" alt="Top-down voyage ship placed directly on the map" /><span class="map-demo__note">SHIP-MAP-TOKEN-V2 · top-down · transparent · đặt trực tiếp tại tâm shipHexId</span></div>
+      <div class="component-grid">
+        <article class="component-card"><div class="component-card__art atlas-actions x2-0 y2-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Map action</span><b>×4</b></div><h3>Cabin Search</h3><p>Kính lúp đồng đặt trên bè gỗ nhỏ. Captain chọn người khác để xem secret faction snapshot.</p><ul class="spec-list"><li><b>Target</b><span>Another player</span></li><li><b>Result</b><span class="state-private">Captain private</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-actions x2-1 y2-0"></div><div class="component-card__copy"><div class="component-card__top"><span>Map action</span><b>×2</b></div><h3>Flogging</h3><p>Roi ba đuôi cuộn gọn trên bè gỗ; silhouette vẫn đọc được khi thu nhỏ.</p><ul class="spec-list"><li><b>Target</b><span>Another player</span></li><li><b>Result</b><span>Public “not faction” clue.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-actions x2-0 y2-1"></div><div class="component-card__copy"><div class="component-card__top"><span>Map action</span><b>×1</b></div><h3>Off With the Tongue</h3><p>Dao thủy thủ và biểu tượng lưỡi bị trói, rõ nghĩa nhưng không có máu me.</p><ul class="spec-list"><li><b>Target</b><span>Another player</span></li><li><b>State</b><span>Silenced; cannot Captain.</span></li></ul></div></article>
+        <article class="component-card"><div class="component-card__art atlas-actions x2-1 y2-1"></div><div class="component-card__copy"><div class="component-card__top"><span>Map action</span><b>×3</b></div><h3>Feed the Kraken</h3><p>Mỗi ô Kraken dùng một con mực riêng trên bè gỗ; không ghép ba ô thành một creature chung.</p><ul class="spec-list"><li><b>Target</b><span>Another player</span></li><li><b>Check</b><span>Cult victory immediately.</span></li></ul></div></article>
+      </div>
+      <div class="atlas-preview"><img src="/art/components/map-actions-atlas-v2.png" alt="Four corrected floating map action markers" /><div class="atlas-preview__copy"><strong>Map-action atlas v2</strong><span>2×2 · đúng bốn loại action; nền trong suốt, crop trực tiếp lên hex.</span><a href="/art/components/map-actions-atlas-v2.png" download>DOWNLOAD PNG</a></div></div>
+    </section>
+
+    <section class="report-section" id="implementation">
+      <div class="section-head"><div><span class="section-kicker">05 · Interaction contract</span><h2>How each family behaves</h2></div><p>Art là một lớp của component; ownership, privacy và phase authority vẫn do server quyết định. Đây là ranh giới để 11 người thao tác cùng lúc mà không nhân đôi vật thể.</p></div>
+      <table class="matrix">
+        <thead><tr><th>Family</th><th>Public table</th><th>Private player mat</th><th>Automation</th><th>Manual recovery</th></tr></thead>
+        <tbody>
+          <tr><td>Officer objects</td><td>Khay chỉ hiện vật chưa có owner</td><td>Owner thấy object cỡ lớn</td><td class="state-assist">Assign/return theo phase</td><td>Host drag/drop lại</td></tr>
+          <tr><td>Gun & Beer</td><td>Supply count còn lại</td><td>Token đang sở hữu</td><td class="state-assist">Card/round effects</td><td>+ / − có audit log</td></tr>
+          <tr><td>Navigation Cards</td><td>Deck, Deep Sea, 2 Logbook backs</td><td>Chỉ owner thấy card face</td><td class="state-auto">Deal, shuffle, movement</td><td>Host correction trước reveal</td></tr>
+          <tr><td>Ritual Cards</td><td>Tên ritual + waiting state</td><td>Cult Leader controls</td><td class="state-private">Secret authoritative endpoint</td><td>Không undo sau secret reveal</td></tr>
+          <tr><td>Map actions</td><td>Token nổi trên đúng hex</td><td>Target/private result</td><td class="state-assist">Legal target filtering</td><td>Captain/host resolve control</td></tr>
+          <tr><td>Ship</td><td>Một vị trí map duy nhất</td><td>Không copy ship</td><td class="state-auto">Resolve direction edge</td><td>Move correction + log</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="report-section" id="prompt">
+      <div class="section-head"><div><span class="section-kicker">06 · Master art prompt</span><h2>Reusable visual direction</h2></div><p>Dùng prompt lõi này khi cần tạo thêm character token, card effect hoặc prop mới để art không lệch khỏi hệ hiện tại.</p></div>
+      <div class="prompt-block">Premium hand-painted gouache and oil fantasy nautical board-game art; mature late-1990s strategy-game manual feel; deep teal storm sea, midnight navy shadows, oxidized brass, salt-weathered dark walnut, parchment cream and restrained oxblood accents; confident visible brushwork, tactile materials, strong readable silhouette at tabletop scale; cool marine ambient light with subtle warm lantern rim light; no embedded text, no letters, no numbers, no logo, no watermark, no modern UI, no photorealism.</div>
+    </section>
+  </main>
+
+  <footer class="report-shell"><span>Feed the Kraken — Secret Companion · Component Art Bible v2</span><span>6 current art assets · restrained cards · direct-on-map pieces</span></footer>
+</body>
+</html>
