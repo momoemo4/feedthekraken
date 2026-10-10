@@ -210,9 +210,17 @@ function playerName(state: PrototypeState, id: string | null) {
   return state.players.find((player) => player.id === id)?.name ?? "—";
 }
 
+function offDutySupplyForPlayerCount(playerCount: number) {
+  if (playerCount >= 9) return 3;
+  if (playerCount >= 7) return 2;
+  return 1;
+}
+
 function roleFor(state: PrototypeState, id: string): BadgeRole[] {
   const roles: BadgeRole[] = [];
-  if (state.captainId === id) roles.push("captain");
+  // During a successful Mutiny the physical hat is in the shared tray,
+  // waiting to be handed over. It must never appear in two places at once.
+  if (state.captainId === id && state.phase !== "CAPTAIN_TRANSFER") roles.push("captain");
   if (state.lieutenantId === id) roles.push("lieutenant");
   if (state.navigatorId === id) roles.push("navigator");
   return roles;
@@ -284,6 +292,9 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
 
   const privateCharacter = CHARACTER_DEFINITIONS[viewer.characterId];
   const canControlViewer = viewer.connected && !viewer.eliminated;
+  const beerSupplyTotal = offDutySupplyForPlayerCount(game.players.length);
+  const beerOnPlayerMats = game.players.reduce((total, player) => total + Math.min(1, player.beer), 0);
+  const beerSupplyRemaining = Math.max(0, beerSupplyTotal - beerOnPlayerMats);
 
   const assignBadge = (role: BadgeRole, targetId: string) => {
     setGame((current) => {
@@ -335,8 +346,22 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       const next = copyState(current);
       const player = next.players.find((candidate) => candidate.id === id);
       if (!player) return current;
-      player[key] = Math.max(0, player[key] + delta);
-      addEvent(next, `${player.name} ${key} ${delta > 0 ? "+" : ""}${delta}${correctionMode ? " · correction" : ""}.`, correctionMode ? "warn" : "action");
+      if (key === "beer") {
+        const supplyTotal = offDutySupplyForPlayerCount(next.players.length);
+        const assigned = next.players.reduce((total, candidate) => total + Math.min(1, candidate.beer), 0);
+        if (delta > 0) {
+          if (player.beer > 0 || assigned >= supplyTotal) return current;
+          player.beer = 1;
+          addEvent(next, `${player.name} takes an Off-Duty Beer (${supplyTotal - assigned - 1} left in supply)${correctionMode ? " · correction" : ""}.`, correctionMode ? "warn" : "action");
+        } else {
+          if (player.beer === 0) return current;
+          player.beer = 0;
+          addEvent(next, `${player.name} returns their Off-Duty Beer to the shared supply${correctionMode ? " · correction" : ""}.`, correctionMode ? "warn" : "action");
+        }
+        return next;
+      }
+      player.guns = Math.max(0, player.guns + delta);
+      addEvent(next, `${player.name} guns ${delta > 0 ? "+" : ""}${delta}${correctionMode ? " · correction" : ""}.`, correctionMode ? "warn" : "action");
       return next;
     });
   };
@@ -795,10 +820,10 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       const lieutenantPlayer = next.players.find((player) => player.id === next.lieutenantId);
       const navigatorPlayer = next.players.find((player) => player.id === next.navigatorId);
       const captainPlayer = next.players.find((player) => player.id === next.captainId);
-      if (captainPlayer) captainPlayer.beer = 1;
-      if (lieutenantPlayer) lieutenantPlayer.beer = 1;
-      if (navigatorPlayer) navigatorPlayer.beer = 1;
-      addEvent(next, `${captainPlayer?.name ?? "Captain"}, ${lieutenantPlayer?.name ?? "Lieutenant"}, and ${navigatorPlayer?.name ?? "Navigator"} receive Beer; Beer is the Off-Duty marker.`, "system");
+      const offDutyCount = offDutySupplyForPlayerCount(next.players.length);
+      const newOffDutyPlayers = [navigatorPlayer, lieutenantPlayer, captainPlayer].filter((player): player is TablePlayer => Boolean(player)).slice(0, offDutyCount);
+      newOffDutyPlayers.forEach((player) => { player.beer = 1; });
+      addEvent(next, `${newOffDutyPlayers.map((player) => player.name).join(", ")} receive the ${offDutyCount} available Off-Duty Beer marker${offDutyCount === 1 ? "" : "s"}.`, "system");
       next.round += 1;
       next.phase = "APPOINT_TEAM";
       next.lieutenantId = null;
@@ -861,7 +886,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
         <div className="seat-roles">{roles.map((role) => <span title={role} className={`mini-role mini-role--${role}`} key={role}>{role === "captain" ? "♛" : role === "lieutenant" ? "◆" : "✦"}</span>)}</div>
         <div className="seat-tokens">
           <span title="Guns"><i>●</i><b>{player.guns}</b></span>
-          <span title="Beer"><i>◆</i><b>{player.beer}</b></span>
+          {player.beer > 0 && <span className="seat-beer-marker" title="Beer · Off-Duty"><i>◆</i><b>OFF DUTY</b></span>}
         </div>
         <div className="seat-status">
           {game.mutinyLocked[player.id] && <span title="Mutiny locked" className="status-locked">✓</span>}
@@ -1024,9 +1049,9 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
                 <header><span>OFFICER BADGES</span></header>
                 <div className="shared-role-slot">{roleTray}</div>
               </section>
-              <div className="edge-supplies">
+              <div className={`edge-supplies ${beerSupplyRemaining === 0 ? "is-beer-empty" : ""}`}>
                 <button className="table-object table-object--gun" title="Take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}><i>●</i><span>GUNS</span><b>+1</b></button>
-                <button title="Beer is the Off-Duty marker" className={`table-object table-object--beer ${viewer.beer > 0 ? "is-on-mat" : ""}`} onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}><i>◆</i><span>BEER</span><b>+1</b></button>
+                {beerSupplyRemaining > 0 && <button disabled={viewer.beer > 0} title={`${beerSupplyRemaining} Off-Duty Beer marker${beerSupplyRemaining === 1 ? "" : "s"} left`} className={`table-object table-object--beer ${viewer.beer > 0 ? "is-on-mat" : ""}`} onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}><i>◆</i><span>BEER</span><b>{beerSupplyRemaining} LEFT</b></button>}
               </div>
               <section className="card-zone card-zone--navigation" aria-label="Navigation deck">
               <header><span>NAVIGATION</span><b>{stats.deck}</b></header>
@@ -1092,7 +1117,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <small>YOUR TABLE · #{viewer.seat}</small>
           <strong>{viewer.name}</strong>
           <button className="private-peek" type="button"><i>◉</i> {viewer.faction.replaceAll("_", " ")}</button>
-          <div className="local-token-row"><span title="Guns">● <b>{viewer.guns}</b></span><span title="Beer · Off-Duty">◆ <b>{viewer.beer}</b></span></div>
+          <div className="local-token-row"><span title="Guns">● <b>{viewer.guns}</b></span>{viewer.beer > 0 && <span className="local-beer-marker" title="Beer · Off-Duty">◆ <b>OFF DUTY</b></span>}</div>
           <div className="local-office-row">
             {viewerRoles.map((role) => <span className={`owned-office owned-office--${role}`} key={role}><i>{role === "captain" ? "♛" : role === "lieutenant" ? "◆" : "✦"}</i><b>{role === "captain" ? "CAPTAIN HAT" : role.toUpperCase()}</b></span>)}
             {!viewerRoles.length && <small>NO OFFICE</small>}
@@ -1117,7 +1142,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
 
         <div className="local-manual-tools">
           <header><span>⚒ TOKENS</span><small>Local correction</small></header>
-          <div className="manual-tokens"><button title="Return one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", -1)}>− ●</button><button title="Take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}>+ ●</button><button title="Return one Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", -1)}>− ◆</button><button title="Take one Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}>+ ◆</button></div>
+          <div className="manual-tokens"><button title="Return one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", -1)}>− ●</button><button title="Take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}>+ ●</button><button disabled={viewer.beer === 0} title="Return Off-Duty Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", -1)}>− ◆</button><button disabled={viewer.beer > 0 || beerSupplyRemaining === 0} title="Take Off-Duty Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}>+ ◆</button></div>
         </div>
 
         <details className="event-log"><summary><span>☷ TABLE LOG</span><b>{game.events.length}</b></summary>{game.events.slice(0, 6).map((event) => <p className={`event--${event.tone}`} key={event.id}>{event.text}</p>)}</details>

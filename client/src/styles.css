@@ -1237,3 +1237,58 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
   .map-edge-dock .companion-tool { min-height: 41px; padding: 4px; }
   .edge-ritual-row { min-height: 91px; }
 }
+
+/* Physical-object ownership: every badge/marker has one visible location. */
+.seat-tokens span:only-child { grid-column: 1 / -1; }
+.seat-beer-marker,
+.local-beer-marker {
+  color: #2a1a08 !important;
+  border-color: #e1aa53 !important;
+  background: linear-gradient(145deg, #e2ad5d, #9b5b25) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.38), 0 4px 10px rgba(0,0,0,.25);
+}
+.seat-beer-marker i,
+.seat-beer-marker b,
+.local-beer-marker b { color: #281707 !important; }
+.edge-supplies.is-beer-empty { grid-template-columns: 1fr; }
+.edge-supplies.is-beer-empty .table-object--gun { grid-column: 1 / -1; }
+.edge-supplies .table-object:disabled { opacity: .42; cursor: not-allowed; filter: saturate(.45); }
+.edge-supplies .table-object b { font-size: clamp(9px, .42vw, 11px); }
+
+.local-office-row {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  align-content: end;
+}
+.owned-office {
+  min-height: 70px;
+  grid-template-columns: 64px minmax(0, 1fr);
+  border-width: 2px;
+  box-shadow: inset 0 0 24px rgba(218,190,112,.08), 0 7px 16px rgba(0,0,0,.3);
+}
+.owned-office i {
+  width: 62px;
+  height: 62px;
+  font-size: 31px;
+  text-shadow: 0 1px rgba(255,255,255,.3);
+}
+.owned-office b {
+  padding: 0 10px;
+  font-size: clamp(11px, .5vw, 14px);
+  line-height: 1.2;
+  text-align: center;
+}
+.owned-office--captain {
+  border-color: #efd782;
+  background: radial-gradient(circle at 24% 50%, rgba(236,202,104,.3), rgba(70,49,19,.65));
+  box-shadow: inset 0 0 28px rgba(238,204,111,.18), 0 0 18px rgba(224,188,89,.2), 0 7px 16px rgba(0,0,0,.34);
+}
+.owned-office--captain i { background: linear-gradient(145deg, #f0d883, #a87728); }
+.owned-office--lieutenant { border-color: rgba(190,99,91,.78); }
+.owned-office--navigator { border-color: rgba(82,149,180,.82); }
+.manual-tokens button:disabled { opacity: .3; cursor: not-allowed; }
+
+@media (max-height: 900px) {
+  .owned-office { min-height: 46px; grid-template-columns: 42px minmax(0, 1fr); }
+  .owned-office i { width: 40px; height: 40px; font-size: 21px; }
+  .owned-office b { padding: 0 6px; font-size: 9px; }
+}
