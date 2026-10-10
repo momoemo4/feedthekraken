@@ -1,6 +1,6 @@
 # Implementation Status
 
-Status date: 2026-10-09. `TESTED` is added only after the command has actually passed.
+Status date: 2026-10-10. `TESTED` is added only after the command has actually passed.
 
 | Subsystem | Status | Notes |
 | --- | --- | --- |
@@ -23,6 +23,7 @@ Status date: 2026-10-09. `TESTED` is added only after the command has actually p
 | Navigation/Ritual card definitions | IMPLEMENTED / TESTED | Long Journey 23-card deck, Quick Journey 19-card deck, five Ritual cards, public/private prompt copy, and automatic/manual flags. |
 | Player action/undo design | DESIGNED / TESTED DATA | Central prompt policies define draft, undo, close, lock, and information-reveal boundaries; React controls and reducer commands remain TODO. |
 | 11-seat assisted tabletop prototype | IMPLEMENTED / LOCAL | Playable browser vertical slice for roles, Mutiny barriers, Navigation hands/Logbook, movement, card/Ritual phases, correction controls, and event history. Multiplayer server wiring remains TODO. |
+| Prototype Navigation/Ritual art wiring | IMPLEMENTED / TESTED / LOCAL | Navigation face/back crops use atlas v3 in private hands, Logbook, reveal, deck and Deep Sea; Ritual face crops use atlas v3 for active/used cards. HTML owns labels/tooltips, and local seat switching hides private card faces from non-owners. |
 | Quick Journey | TODO / UNVERIFIED | Requires a clear reference image. |
 
 ## Milestone boundary
@@ -34,6 +35,7 @@ This repository implements Milestone 0 and the audit tooling portion of Mileston
 - `npm test`: 7 files, 25 tests passed.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
+- Browser flow QA: Captain/Lieutenant private hands, hidden non-owner views, shuffled Navigator Logbook, public reveal, active Ritual, used Ritual pile, and atlas crop loading verified.
 - Local client: HTTP 200.
 - Local API health: `{ "ok": true, "milestone": 1, "mapVerified": false }`.
 - `npm run simulate:8p`: 9-round deterministic game completed; public-secret leak audit passed.

@@ -1381,3 +1381,181 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
   .local-office-display .owned-office i { width: 70px; height: 70px; font-size: 36px; }
   .local-office-display .owned-office b { padding: 4px 2px 1px; font-size: 10px; }
 }
+
+/* Atlas-backed card system: illustration stays text-free; labels remain accessible HTML. */
+.nav-card {
+  width: clamp(112px, 7vw, 148px);
+  min-height: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  color: #eadcae;
+  background: transparent;
+  box-shadow: none;
+}
+.nav-card::before { display: none; }
+.nav-card__face {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid rgba(230, 211, 157, .48);
+  border-radius: 5px;
+  background: #101d20;
+  box-shadow: 0 9px 16px rgba(0,0,0,.34), inset 0 0 0 1px rgba(255,255,255,.07);
+}
+.nav-card__art {
+  position: absolute;
+  inset: 0;
+  background-image: url('/art/components/navigation-cards-atlas-v3.png');
+  background-repeat: no-repeat;
+  background-size: 400% 200%;
+}
+.nav-card__art--yellow_cult_uprising { background-position: 0 0; }
+.nav-card__art--blue_drunk { background-position: 33.333% 0; }
+.nav-card__art--blue_disarmed { background-position: 66.667% 0; }
+.nav-card__art--red_drunk { background-position: 100% 0; }
+.nav-card__art--red_mermaid { background-position: 0 100%; }
+.nav-card__art--red_telescope { background-position: 33.333% 100%; }
+.nav-card__art--red_armed { background-position: 66.667% 100%; }
+.nav-card__direction,
+.nav-card__face > strong,
+.nav-card__face > small {
+  position: absolute;
+  z-index: 1;
+  margin: 0;
+  pointer-events: none;
+  text-shadow: 0 1px 3px #000, 0 0 7px rgba(0,0,0,.85);
+}
+.nav-card__direction {
+  top: 7px;
+  left: 8px;
+  display: block;
+  padding: 3px 5px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: inherit;
+  background: rgba(5,12,13,.66);
+  font: 800 clamp(5px, .31vw, 7px) "DM Mono", monospace;
+  letter-spacing: .08em;
+}
+.nav-card__face > strong {
+  top: 7px;
+  right: 7px;
+  max-width: 56%;
+  padding: 2px 4px;
+  color: #fff4cf;
+  background: rgba(5,12,13,.52);
+  font: 700 clamp(9px, .6vw, 13px) "Libre Caslon Text", Georgia, serif;
+  line-height: 1.05;
+  text-align: right;
+}
+.nav-card__face > small {
+  bottom: 7px;
+  left: 7px;
+  width: auto;
+  height: auto;
+  padding: 3px 5px;
+  overflow: visible;
+  color: #eee2bd;
+  background: rgba(5,12,13,.72);
+  font: 800 clamp(5px, .3vw, 7px) "DM Mono", monospace;
+  letter-spacing: .06em;
+}
+.nav-card--red .nav-card__face { border-color: rgba(219,120,106,.72); }
+.nav-card--blue .nav-card__face { border-color: rgba(115,184,211,.72); }
+.nav-card--yellow .nav-card__face { border-color: rgba(225,199,95,.76); }
+.nav-card > button {
+  width: 100%;
+  min-height: 24px;
+  margin-top: 5px;
+  padding: 5px 4px;
+  border: 1px solid rgba(232,210,145,.56);
+  color: #ead99d;
+  background: linear-gradient(180deg, rgba(40,53,47,.98), rgba(11,28,28,.98));
+  font: 800 clamp(6px, .34vw, 8px) "DM Mono", monospace;
+  cursor: pointer;
+}
+.nav-card > button:hover { border-color: #efd986; background: rgba(227,199,119,.12); }
+
+.ritual-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(74px, 5vw, 102px);
+  aspect-ratio: 7 / 12;
+  overflow: hidden;
+  border: 1px solid rgba(194,181,154,.55);
+  border-radius: 5px;
+  background: #15191b;
+  box-shadow: 0 9px 16px rgba(0,0,0,.36), inset 0 0 0 1px rgba(255,255,255,.05);
+}
+.ritual-card__art {
+  position: absolute;
+  inset: 0;
+  background-image: url('/art/components/ritual-cards-atlas-v3.png');
+  background-repeat: no-repeat;
+  background-size: 300% 100%;
+}
+.ritual-card--conversion .ritual-card__art { background-position: 0 0; }
+.ritual-card--cult_guns_stash .ritual-card__art { background-position: 50% 0; }
+.ritual-card--cult_cabin_search .ritual-card__art { background-position: 100% 0; }
+.ritual-card > span,
+.ritual-card > strong {
+  position: absolute;
+  z-index: 1;
+  right: 6px;
+  left: 6px;
+  margin: 0;
+  color: #ded7c4;
+  text-shadow: 0 1px 3px #000, 0 0 7px #000;
+}
+.ritual-card > span {
+  top: 7px;
+  font: 800 clamp(5px, .28vw, 7px) "DM Mono", monospace;
+  letter-spacing: .14em;
+}
+.ritual-card > strong {
+  bottom: 8px;
+  padding: 3px 4px;
+  background: rgba(9,12,13,.67);
+  font: 700 clamp(8px, .48vw, 11px) "Libre Caslon Text", Georgia, serif;
+  line-height: 1.08;
+  text-align: center;
+}
+.ritual-card.is-compact { width: 32px; border-radius: 2px; box-shadow: 0 3px 7px rgba(0,0,0,.3); }
+.ritual-card.is-compact > span { display: none; }
+.ritual-card.is-compact > strong { right: 2px; bottom: 2px; left: 2px; padding: 1px; font-size: 3px; }
+
+.deck-stack--navigation i,
+.deck-stack--navigation strong,
+.discard-fan--navigation i,
+.logbook-slots i.has-card {
+  background-color: #121d1e;
+  background-image: url('/art/components/navigation-cards-atlas-v3.png');
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: 400% 200%;
+}
+.deck-stack--ritual i,
+.deck-stack--ritual strong {
+  background-color: #15191b;
+  background-image: url('/art/components/physical-components-atlas.png');
+  background-repeat: no-repeat;
+  background-position: 50% 100%;
+  background-size: 300% 300%;
+}
+.discard-fan--navigation i { border-color: rgba(198,181,132,.42); }
+.logbook-slots i.has-card { border-color: rgba(220,200,142,.62); }
+.used-ritual-list {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+}
+.used-ritual-list .ritual-card { padding: 0; }
+
+@media (max-height: 900px) {
+  .local-phase-panel .nav-card { width: 104px; min-height: 0; padding: 0; }
+  .local-phase-panel .nav-card__face > strong { font-size: 9px; }
+  .local-phase-panel .nav-card__face > small { height: auto; font-size: 5px; }
+  .local-phase-panel .ritual-card { width: 64px; }
+}

@@ -203,7 +203,8 @@ function copyState(state: PrototypeState): PrototypeState {
 }
 
 function addEvent(state: PrototypeState, text: string, tone: TableEvent["tone"] = "action") {
-  state.events.unshift({ id: (state.events[0]?.id ?? 0) + 1, tone, text });
+  const nextId = state.events.reduce((maximum, event) => Math.max(maximum, event.id), 0) + 1;
+  state.events.unshift({ id: nextId, tone, text });
 }
 
 function playerName(state: PrototypeState, id: string | null) {
@@ -242,13 +243,41 @@ function Badge({ role, selected, onPick }: { role: BadgeRole; selected: boolean;
   );
 }
 
+const NAVIGATION_DIRECTION_LABELS: Record<NavigationCardInstance["direction"], string> = {
+  red: "WEST · RED",
+  blue: "EAST · BLUE",
+  yellow: "NORTH · YELLOW",
+};
+
 function NavigationCard({ card, action, onAction }: { card: NavigationCardInstance; action?: string; onAction?: () => void }) {
   return (
-    <article className={`nav-card nav-card--${card.direction}`}>
-      <span className="nav-card__direction">{card.direction.toUpperCase()}</span>
-      <strong>{card.name}</strong>
-      <small>{card.publicPrompt}</small>
+    <article
+      className={`nav-card nav-card--${card.direction}`}
+      aria-label={`${NAVIGATION_DIRECTION_LABELS[card.direction]}. ${card.name}. ${card.publicPrompt}`}
+      title={card.publicPrompt}
+    >
+      <div className="nav-card__face">
+        <div className={`nav-card__art nav-card__art--${card.key}`} aria-hidden="true" />
+        <span className="nav-card__direction">{NAVIGATION_DIRECTION_LABELS[card.direction]}</span>
+        <strong>{card.name}</strong>
+        <small>{card.effect.replaceAll("_", " ")}</small>
+      </div>
       {action && onAction && <button type="button" onClick={onAction}>{action}</button>}
+    </article>
+  );
+}
+
+function RitualCard({ ritualId, compact = false }: { ritualId: RitualCardId; compact?: boolean }) {
+  const ritual = RITUAL_CARD_DEFINITIONS[ritualId];
+  return (
+    <article
+      className={`ritual-card ritual-card--${ritualId.toLowerCase()} ${compact ? "is-compact" : ""}`}
+      aria-label={`${ritual.name}. ${ritual.publicPrompt}`}
+      title={ritual.publicPrompt}
+    >
+      <div className="ritual-card__art" aria-hidden="true" />
+      <span>RITUAL</span>
+      <strong>{ritual.name}</strong>
     </article>
   );
 }
@@ -953,13 +982,22 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       return (
         <div className="phase-action-grid">
           <div><h3>{role === "captain" ? "Captain" : "Lieutenant"} private hand</h3><p>Draw two, then put exactly one in the Logbook. The rest sinks facedown into Deep Sea.</p></div>
-          {!hand.length ? <div className="waiting-card">{correctViewer ? "Click DRAW 2 on the Navigation Deck beside the map." : `Waiting for ${playerName(game, role === "captain" ? game.captainId : game.lieutenantId)} to draw.`}</div> : <div className="card-hand">{hand.map((card) => <NavigationCard key={card.id} card={card} action="PUT IN LOGBOOK" onAction={() => submitNavigationCard(role, card.id)} />)}</div>}
+          {!correctViewer
+            ? <div className="waiting-card">Private hand hidden · waiting for {playerName(game, role === "captain" ? game.captainId : game.lieutenantId)}.</div>
+            : !hand.length
+              ? <div className="waiting-card">Click DRAW 2 on the Navigation Deck beside the map.</div>
+              : <div className="card-hand">{hand.map((card) => <NavigationCard key={card.id} card={card} action="PUT IN LOGBOOK" onAction={() => submitNavigationCard(role, card.id)} />)}</div>}
         </div>
       );
     }
 
     if (game.phase === "NAVIGATOR_CHOOSE") return (
-      <div className="phase-action-grid"><div><h3>Shuffled Captain's Logbook</h3><p>Navigator chooses one card to play without knowing its source—or refuses command and jumps overboard.</p></div><div className="card-hand">{game.logbook.map((card) => <NavigationCard key={card.id} card={card} action="PLAY THIS CARD" onAction={() => playNavigationCard(card.id)} />)}</div><button className="prototype-danger" disabled={viewerId !== game.navigatorId} onClick={jumpOverboard}>JUMP OVERBOARD</button></div>
+      <div className="phase-action-grid">
+        <div><h3>Shuffled Captain's Logbook</h3><p>Navigator chooses one card to play without knowing its source—or refuses command and jumps overboard.</p></div>
+        {viewerId === game.navigatorId
+          ? <><div className="card-hand">{game.logbook.map((card) => <NavigationCard key={card.id} card={card} action="PLAY THIS CARD" onAction={() => playNavigationCard(card.id)} />)}</div><button className="prototype-danger" onClick={jumpOverboard}>JUMP OVERBOARD</button></>
+          : <div className="waiting-card">Logbook faces hidden · waiting for {playerName(game, game.navigatorId)}.</div>}
+      </div>
     );
 
     if (game.phase === "EMERGENCY_NAVIGATOR") return (
@@ -973,7 +1011,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
     if (game.phase === "CARD_EFFECT") {
       const needsTarget = game.revealedCard?.effect === "MERMAID" || game.revealedCard?.effect === "TELESCOPE";
       return (
-        <div className="phase-action-grid"><div><h3>{game.revealedCard?.name}</h3><p>{game.revealedCard?.publicPrompt}</p></div>{needsTarget && <select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Captain chooses a player…</option>{targetOptions.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select>}<button className="prototype-primary" disabled={needsTarget && (!game.actionTargetId || viewerId !== game.captainId)} onClick={resolveCardEffect}>RESOLVE CARD</button></div>
+        <div className="phase-action-grid"><div><h3>{game.revealedCard?.name}</h3><p>{game.revealedCard?.publicPrompt}</p></div>{game.revealedCard && <NavigationCard card={game.revealedCard} />}{needsTarget && <select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Captain chooses a player…</option>{targetOptions.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select>}<button className="prototype-primary" disabled={needsTarget && (!game.actionTargetId || viewerId !== game.captainId)} onClick={resolveCardEffect}>RESOLVE CARD</button></div>
       );
     }
 
@@ -984,6 +1022,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       return (
         <div className="phase-action-grid">
           <div><h3>{ritual.name}</h3><p>{ritual.publicPrompt}</p></div>
+          <RitualCard ritualId={game.activeRitual} />
           {game.activeRitual === "CONVERSION" && cultCanAct && <select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Choose privately…</option>{game.players.filter((player) => !player.eliminated && !player.searched && !player.flogged && player.faction !== "CULT_LEADER" && player.faction !== "CULTIST").map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select>}
           {game.activeRitual === "CULT_GUNS_STASH" && cultCanAct && <div className="cult-gun-tool"><select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Choose recipient…</option>{game.players.filter((player) => !player.eliminated).map((player) => <option key={player.id} value={player.id}>{player.name} · +{game.cultGunAllocation[player.id] ?? 0}</option>)}</select><button onClick={() => adjustCultGunAllocation(-1)}>−</button><b>{cultGunTotal}/3</b><button onClick={() => adjustCultGunAllocation(1)}>+</button></div>}
           {!cultCanAct && <div className="waiting-card">Waiting for the Cult Leader…</div>}
@@ -1055,14 +1094,14 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
               </div>
               <section className="card-zone card-zone--navigation" aria-label="Navigation deck">
               <header><span>NAVIGATION</span><b>{stats.deck}</b></header>
-              <div className="deck-stack deck-stack--navigation"><i /><i /><strong>N</strong></div>
+              <div className="deck-stack deck-stack--navigation" aria-hidden="true"><i /><i /><strong /></div>
               <button disabled={!canDrawNavigation} onClick={() => activeDrawRole && drawForRole(activeDrawRole)}>DRAW 2</button>
               {correctionMode && <button className="card-zone__minor" disabled={!activeDrawRole || activeDrawOwnerId !== viewerId} onClick={drawOneCorrection}>DRAW 1</button>}
               </section>
 
               <section className="card-zone card-zone--deepsea" aria-label="Deep Sea discard">
               <header><span>DEEP SEA</span><b>{stats.deepSea}</b></header>
-              <div className="discard-fan"><i /><i /><i /></div>
+              <div className="discard-fan discard-fan--navigation" aria-hidden="true"><i /><i /><i /></div>
               <small>FACE DOWN</small>
               {correctionMode && <button className="card-zone__minor" onClick={shuffleDeepSeaNow}>SHUFFLE NOW</button>}
               </section>
@@ -1086,7 +1125,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
               <section className="card-zone card-zone--logbook" aria-label="Captain's Logbook">
                 <header><span>LOGBOOK</span><b>{game.logbook.length}/2</b></header>
                 <div className="logbook-slots">
-                  {[0, 1].map((slot) => <i className={game.logbook[slot] ? "has-card" : ""} key={slot}>{game.logbook[slot] ? "?" : "+"}</i>)}
+                  {[0, 1].map((slot) => <i className={game.logbook[slot] ? "has-card" : ""} aria-label={game.logbook[slot] ? `Facedown Logbook card ${slot + 1}` : `Empty Logbook slot ${slot + 1}`} key={slot}>{game.logbook[slot] ? "" : "+"}</i>)}
                 </div>
                 <small>SHUFFLED</small>
               </section>
@@ -1094,13 +1133,13 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
               <div className="edge-ritual-row">
                 <section className="card-zone card-zone--ritual" aria-label="Ritual deck">
                   <header><span>RITUAL</span><b>{stats.rituals}</b></header>
-                  <div className="deck-stack deck-stack--ritual"><i /><i /><strong>☽</strong></div>
+                  <div className="deck-stack deck-stack--ritual" aria-hidden="true"><i /><i /><strong /></div>
                   {correctionMode && <button className="card-zone__minor" onClick={drawRitualCorrection}>DRAW</button>}
                 </section>
 
                 <section className="card-zone card-zone--used" aria-label="Used ritual cards">
                   <header><span>USED</span><b>{game.usedRituals.length}</b></header>
-                  <div className="used-ritual-list">{game.usedRituals.length ? game.usedRituals.map((id) => <span key={id}>{RITUAL_CARD_DEFINITIONS[id].name}</span>) : <small>—</small>}</div>
+                  <div className="used-ritual-list">{game.usedRituals.length ? game.usedRituals.map((id, index) => <RitualCard ritualId={id} compact key={`${id}-${index}`} />) : <small>—</small>}</div>
                 </section>
               </div>
             </aside>
