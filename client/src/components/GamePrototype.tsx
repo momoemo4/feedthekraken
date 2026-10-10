@@ -45,7 +45,6 @@ interface TablePlayer {
   silenced: boolean;
   searched: boolean;
   flogged: boolean;
-  offDuty: boolean;
   resume: NavigationCardInstance[];
 }
 
@@ -143,7 +142,6 @@ function createPlayers(): TablePlayer[] {
     silenced: false,
     searched: false,
     flogged: false,
-    offDuty: false,
     resume: [],
   }));
 }
@@ -306,7 +304,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
         return next;
       }
 
-      if (next.phase !== "APPOINT_TEAM" || viewerId !== next.captainId || targetId === next.captainId || target.offDuty) return current;
+      if (next.phase !== "APPOINT_TEAM" || viewerId !== next.captainId || targetId === next.captainId || target.beer > 0) return current;
       if (role === "lieutenant") {
         next.lieutenantId = targetId;
         if (next.navigatorId === targetId) next.navigatorId = null;
@@ -465,16 +463,6 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       player.characterRevealed = true;
       player.characterUsed = true;
       addEvent(next, `${player.name} reveals ${CHARACTER_DEFINITIONS[player.characterId].name}. Effect is resolved manually in this tabletop prototype.`, "action");
-      return next;
-    });
-  };
-
-  const toggleViewerStatus = (key: "offDuty" | "silenced" | "searched" | "flogged") => {
-    setGame((current) => {
-      const next = copyState(current);
-      const player = next.players.find((candidate) => candidate.id === viewerId)!;
-      player[key] = !player[key];
-      addEvent(next, `${player.name} ${player[key] ? "receives" : "removes"} ${key.toUpperCase()} marker.`, correctionMode ? "warn" : "action");
       return next;
     });
   };
@@ -804,14 +792,14 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
     setGame((current) => {
       if (current.phase !== "ROUND_END") return current;
       const next = copyState(current);
-      next.players.forEach((player) => { player.offDuty = false; });
+      next.players.forEach((player) => { player.beer = 0; });
       const lieutenantPlayer = next.players.find((player) => player.id === next.lieutenantId);
       const navigatorPlayer = next.players.find((player) => player.id === next.navigatorId);
       const captainPlayer = next.players.find((player) => player.id === next.captainId);
-      if (captainPlayer) captainPlayer.offDuty = true;
-      if (lieutenantPlayer) lieutenantPlayer.offDuty = true;
-      if (navigatorPlayer) navigatorPlayer.offDuty = true;
-      addEvent(next, `${captainPlayer?.name ?? "Captain"}, ${lieutenantPlayer?.name ?? "Lieutenant"}, and ${navigatorPlayer?.name ?? "Navigator"} receive Off-Duty markers for this 11-player game.`, "system");
+      if (captainPlayer) captainPlayer.beer = 1;
+      if (lieutenantPlayer) lieutenantPlayer.beer = 1;
+      if (navigatorPlayer) navigatorPlayer.beer = 1;
+      addEvent(next, `${captainPlayer?.name ?? "Captain"}, ${lieutenantPlayer?.name ?? "Lieutenant"}, and ${navigatorPlayer?.name ?? "Navigator"} receive Beer; Beer is the Off-Duty marker.`, "system");
       next.round += 1;
       next.phase = "APPOINT_TEAM";
       next.lieutenantId = null;
@@ -856,7 +844,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
     const commitmentVisible = game.phase === "MUTINY_REACTION" || game.phase === "CAPTAIN_TRANSFER";
     return (
       <article
-        className={`player-seat ${isViewer ? "is-viewer" : ""} ${player.offDuty ? "is-off-duty" : ""} ${player.eliminated ? "is-eliminated" : ""}`}
+        className={`player-seat ${isViewer ? "is-viewer" : ""} ${player.beer > 0 ? "is-off-duty" : ""} ${player.eliminated ? "is-eliminated" : ""}`}
         key={player.id}
         onClick={() => {
           if (selectedBadge) assignBadge(selectedBadge, player.id);
@@ -876,10 +864,6 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <span title="Beer"><i>◆</i><b>{player.beer}</b></span>
         </div>
         <div className="seat-status">
-          {player.offDuty && <span title="Off-Duty">×</span>}
-          {player.silenced && <span title="Silenced">✂</span>}
-          {player.searched && <span title="Cabin Searched">⌕</span>}
-          {player.flogged && <span title="Flogged">≋</span>}
           {game.mutinyLocked[player.id] && <span title="Mutiny locked" className="status-locked">✓</span>}
           {commitmentVisible && player.id !== game.captainId && <span title="Revealed Mutiny Guns" className="status-reveal">● {game.commitments[player.id] ?? 0}</span>}
           {game.reactionPassed[player.id] && <span title="Passed reaction">PASS</span>}
@@ -954,7 +938,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
     );
 
     if (game.phase === "EMERGENCY_NAVIGATOR") return (
-      <div className="phase-action-grid"><div><h3>Choose an Emergency Navigator</h3><p>Off-Duty players are legal. Lieutenant stays in office; Navigation restarts immediately without another Mutiny.</p></div><select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Choose living player…</option>{game.players.filter((player) => !player.eliminated && player.id !== game.captainId).map((player) => <option key={player.id} value={player.id}>{player.name}{player.offDuty ? " · off-duty allowed" : ""}</option>)}</select><button className="prototype-primary" disabled={viewerId !== game.captainId || !game.actionTargetId} onClick={confirmEmergencyNavigator}>CONFIRM EMERGENCY NAVIGATOR</button></div>
+      <div className="phase-action-grid"><div><h3>Choose an Emergency Navigator</h3><p>Players holding Beer are Off-Duty but remain legal here. Lieutenant stays in office.</p></div><select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Choose living player…</option>{game.players.filter((player) => !player.eliminated && player.id !== game.captainId).map((player) => <option key={player.id} value={player.id}>{player.name}{player.beer > 0 ? " · Beer/Off-Duty allowed" : ""}</option>)}</select><button className="prototype-primary" disabled={viewerId !== game.captainId || !game.actionTargetId} onClick={confirmEmergencyNavigator}>CONFIRM EMERGENCY NAVIGATOR</button></div>
     );
 
     if (game.phase === "MAP_ACTION") return (
@@ -1022,11 +1006,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
         <div className="shared-object-rack__label"><small>SHARED TABLE</small><strong>Drag, take or return</strong></div>
         <div className="shared-role-slot"><span>OFFICER BADGES</span>{roleTray}</div>
         <button className="table-object table-object--gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}><i>●</i><span>GUN SUPPLY</span><b>TAKE +1</b></button>
-        <button className="table-object table-object--beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}><i>◆</i><span>BEER BARREL</span><b>TAKE +1</b></button>
-        <button className={`table-object ${viewer.offDuty ? "is-on-mat" : ""}`} onClick={() => toggleViewerStatus("offDuty")}><i>×</i><span>OFF-DUTY</span><b>{viewer.offDuty ? "RETURN" : "TAKE"}</b></button>
-        <button className={`table-object ${viewer.silenced ? "is-on-mat" : ""}`} onClick={() => toggleViewerStatus("silenced")}><i>⌁</i><span>SILENCED</span><b>{viewer.silenced ? "RETURN" : "TAKE"}</b></button>
-        <button className={`table-object ${viewer.searched ? "is-on-mat" : ""}`} onClick={() => toggleViewerStatus("searched")}><i>⌕</i><span>SEARCHED</span><b>{viewer.searched ? "RETURN" : "TAKE"}</b></button>
-        <button className={`table-object ${viewer.flogged ? "is-on-mat" : ""}`} onClick={() => toggleViewerStatus("flogged")}><i>≋</i><span>FLOGGED</span><b>{viewer.flogged ? "RETURN" : "TAKE"}</b></button>
+        <button title="Beer is the Off-Duty marker" className={`table-object table-object--beer ${viewer.beer > 0 ? "is-on-mat" : ""}`} onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}><i>◆</i><span>BEER · OFF-DUTY</span><b>TAKE +1</b></button>
       </section>
 
       <nav className={`companion-action-bar ${toolsExpanded ? "is-expanded" : ""}`} aria-label="Companion actions">
@@ -1102,7 +1082,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <small>YOUR TABLE · #{viewer.seat}</small>
           <strong>{viewer.name}</strong>
           <button className="private-peek" type="button"><i>◉</i> {viewer.faction.replaceAll("_", " ")}</button>
-          <div className="local-token-row"><span title="Guns">● <b>{viewer.guns}</b></span><span title="Beer">◆ <b>{viewer.beer}</b></span>{viewer.offDuty && <i title="Off-Duty">×</i>}{viewer.silenced && <i title="Silenced">✂</i>}{viewer.searched && <i title="Cabin Searched">⌕</i>}{viewer.flogged && <i title="Flogged">≋</i>}</div>
+          <div className="local-token-row"><span title="Guns">● <b>{viewer.guns}</b></span><span title="Beer · Off-Duty">◆ <b>{viewer.beer}</b></span></div>
         </div>
 
         <div className={`character-text-card ${viewer.characterUsed ? "is-used" : ""}`}>

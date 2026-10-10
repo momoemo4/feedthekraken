@@ -12,17 +12,13 @@ The prototype may contain explanatory text for testing, but the production UI mu
 
 Create one continuous tabletop with this composition:
 
-1. A narrow header showing game name, round, current phase, simulated private-phone selector, Correction Mode, map audit and reset.
+1. A narrow header showing game name, round, current phase, development-only seat selector, Correction Mode, map audit and reset.
 2. A shared object rack directly below the header containing:
    - Captain hat/badge
    - Lieutenant badge
    - Navigator badge
    - Gun supply
-   - Beer barrel
-   - Off-Duty markers
-   - Silenced marker
-   - Cabin Searched marker
-   - Flogged marker
+   - Beer barrel; Beer itself is the physical Off-Duty marker
 3. Five opponent stations on the left of the map and five on the right.
 4. A large illustrated Long Journey hex map in the center. The map must visually dominate.
 5. The current player's private table/mat across the bottom.
@@ -38,7 +34,7 @@ Each opponent station should be compact and mostly visual. Show:
 - public Gun count
 - public Beer count
 - Captain/Lieutenant/Navigator badge if held
-- Off-Duty, Silenced, Searched, Flogged and Eliminated markers
+- Beer count as the visible Off-Duty state, plus Eliminated state when relevant
 - face-down Character card, or the revealed Character name after activation
 - small public résumé/portfolio of played Navigation cards
 - READY/LOCKED/PASS state when relevant
@@ -48,7 +44,7 @@ The current player's bottom mat contains:
 - player name and seat
 - private faction reveal area
 - private Character card as a text card
-- public Gun/Beer counters and status tokens
+- public Gun and Beer/Off-Duty counters
 - public résumé
 - officer summary
 - private hand or current phase action
@@ -147,7 +143,7 @@ Implement an explicit prototype state machine with contextual controls for:
     - resolve before the Navigation Card effect
     - support Cabin Search, Flogging, Off With the Tongue and Feed the Kraken
     - Captain chooses the required target
-    - update public markers while preserving private information
+    - preserve private information; do not add persistent Silenced, Searched or Flogged UI tokens
 
 12. **Navigation Card Effect**
     - support Drunk, Mermaid, Telescope, Armed, Disarmed and Cult Uprising
@@ -160,7 +156,7 @@ Implement an explicit prototype state machine with contextual controls for:
     - move resolved ritual into Used Rituals
 
 14. **Round End / Game Over**
-    - assign Off-Duty markers
+    - give Beer to the roles that become Off-Duty
     - begin next round or show the winning faction
 
 ## Manual tabletop behavior
@@ -169,7 +165,6 @@ Automation must be helpful but reversible. Players should still be able to:
 
 - take or return Guns and Beer
 - move officer badges
-- add or remove status markers
 - correct revealed Gun commitments
 - move the ship to a selected hex in Correction Mode
 - draw one Navigation card manually
