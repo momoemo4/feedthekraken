@@ -636,3 +636,223 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
   .prototype-board { grid-template-rows: 36px minmax(620px, 70vh) auto; }
   .board-object-dock { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* Single-screen desktop table */
+.prototype-shell {
+  width: 100vw;
+  height: 100vh;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 56px minmax(0, 1fr) 174px;
+  overflow: hidden;
+}
+.prototype-topbar {
+  position: relative;
+  top: auto;
+  min-height: 0;
+  height: 56px;
+  grid-template-columns: minmax(220px, 1fr) minmax(170px, auto) minmax(180px, 240px) 70px 70px 70px;
+  padding: 5px 10px;
+  gap: 7px;
+}
+.prototype-brand > span { width: 36px; height: 36px; font-size: 17px; }
+.prototype-brand strong { font-size: 14px; }
+.phase-readout { min-width: 170px; padding: 4px 10px; }
+.viewer-switch select { height: 28px; }
+.prototype-ghost, .correction-toggle { height: 31px; padding: 0 7px; }
+
+.prototype-table {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: clamp(158px, 13vw, 194px) minmax(0, 1fr) clamp(158px, 13vw, 194px);
+  gap: 6px;
+  padding: 6px 8px;
+  overflow: hidden;
+}
+.prototype-board {
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: 28px minmax(0, 1fr);
+  gap: 5px;
+}
+.table-phase-strip { height: 28px; grid-template-columns: 56px auto 1fr; padding: 0 8px; }
+.table-phase-strip small { display: none; }
+.prototype-map-frame { height: 100%; min-height: 0; }
+
+.player-rail {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+  overflow: hidden;
+}
+.player-seat {
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  padding: 6px 42px 5px 39px;
+}
+.seat-avatar { left: 6px; top: 6px; width: 27px; height: 27px; font-size: 12px; }
+.player-seat header { grid-template-columns: 20px 1fr auto; gap: 4px; }
+.player-seat header b { font-size: 11px; }
+.seat-roles { left: 8px; top: 38px; width: 22px; gap: 2px; }
+.mini-role { min-width: 17px; width: 17px; height: 17px; font-size: 7px; }
+.seat-tokens { gap: 3px; margin-top: 5px; }
+.seat-tokens span { min-height: 21px; gap: 4px; }
+.seat-tokens b { font-size: 10px; }
+.seat-status { margin-top: 3px; }
+.seat-status span { min-width: 17px; min-height: 17px; }
+.seat-character-card { top: 31px; right: 5px; width: 38px; height: 29px; }
+.seat-character-card small { font-size: 5px; }.seat-character-card b { font-size: 5px; }
+.seat-resume { min-height: 17px; height: 17px; margin-top: 3px; padding-top: 2px; overflow: hidden; }
+.seat-resume .resume-card { width: 12px; height: 16px; font-size: 5px; }
+
+.map-edge-dock {
+  position: absolute;
+  z-index: 7;
+  top: 7px;
+  bottom: 7px;
+  width: clamp(124px, 12.5%, 150px);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  pointer-events: none;
+}
+.map-edge-dock--left { left: 7px; }
+.map-edge-dock--right { right: 7px; }
+.map-edge-dock > *, .map-edge-dock button, .map-edge-dock select { pointer-events: auto; }
+.edge-object-panel,
+.map-edge-dock .card-zone,
+.map-edge-dock .companion-action-bar {
+  border: 1px solid rgba(226,204,142,.35);
+  background: rgba(3,20,21,.88);
+  box-shadow: 0 6px 14px rgba(0,0,0,.34);
+  backdrop-filter: blur(6px);
+}
+.edge-object-panel > header,
+.map-edge-dock .companion-action-bar > header {
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  border-bottom: 1px solid rgba(222,199,136,.15);
+  color: #cbbb8c;
+  font: 800 5px "DM Mono", monospace;
+  letter-spacing: .06em;
+}
+.edge-object-panel .shared-role-slot {
+  display: block;
+  padding: 5px;
+  border: 0;
+  background: transparent;
+}
+.edge-object-panel .role-tray { display: grid !important; grid-template-columns: 1fr 1fr; gap: 4px; }
+.edge-object-panel .role-badge { min-width: 0; width: 100%; height: 34px; padding: 0 3px; font-size: 5px; }
+.edge-object-panel .role-badge span { display: block; margin: 0; font-size: 11px; }
+.edge-supplies { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.edge-supplies .table-object { min-height: 45px; height: 45px; grid-template-rows: 27px auto; padding: 3px; }
+.edge-supplies .table-object i { width: 24px; height: 24px; font-size: 11px; }
+.edge-supplies .table-object span { font-size: 5px; }
+
+.map-edge-dock .card-zone {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  min-height: 0;
+  padding: 5px;
+  transform: none;
+}
+.map-edge-dock .card-zone header { min-height: 20px; padding-bottom: 3px; }
+.map-edge-dock .card-zone header span { font-size: 5px; }
+.map-edge-dock .deck-stack { width: 34px; height: 45px; margin: 5px auto 2px; }
+.map-edge-dock .deck-stack strong { font-size: 13px; }
+.map-edge-dock .card-zone button { min-height: 24px; margin-top: 3px; }
+.map-edge-dock .card-zone--navigation { flex: 0 0 auto; }
+.map-edge-dock .card-zone--deepsea { flex: 0 0 auto; }
+.map-edge-dock .discard-fan { width: 54px; height: 32px; margin: 4px auto 0; }
+.map-edge-dock .card-zone--logbook { width: 100%; }
+.map-edge-dock .logbook-slots { gap: 5px; padding: 4px 0 1px; }
+.map-edge-dock .logbook-slots i { width: 29px; height: 38px; font-size: 10px; }
+.edge-ritual-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; min-height: 82px; }
+.edge-ritual-row .card-zone { height: 100%; }
+.edge-ritual-row .deck-stack { width: 28px; height: 36px; }
+.edge-ritual-row .used-ritual-list { max-height: 50px; overflow: hidden; }
+.edge-ritual-row .used-ritual-list span { padding: 2px; font-size: 4px; }
+
+.map-edge-dock .companion-action-bar {
+  position: relative;
+  inset: auto;
+  min-height: 0;
+  display: block;
+  padding: 0 0 5px;
+}
+.map-edge-dock .companion-action-bar > header i { color: #e1c778; font-size: 11px; font-style: normal; }
+.map-edge-dock .companion-action-bar > header b { color: #db9c62; }
+.map-edge-dock .companion-action-bar__tools {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  padding: 5px;
+}
+.map-edge-dock .companion-tool {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding: 2px;
+}
+.map-edge-dock .companion-tool i { width: 25px; height: 25px; font-size: 12px; }
+.map-edge-dock .companion-tool span { display: none; }
+
+.ship-correction { bottom: 7px; }
+.board-object-dock, .shared-object-rack { display: none; }
+
+.local-player-mat {
+  position: relative;
+  z-index: 14;
+  width: 100%;
+  height: 174px;
+  min-height: 0;
+  grid-template-columns: 150px 235px 142px minmax(360px, 1fr) 112px 145px;
+  gap: 6px;
+  padding: 7px 8px;
+  overflow: hidden;
+}
+.local-player-mat__identity { padding: 7px; overflow: hidden; }
+.local-player-mat__identity strong { margin-top: 3px; font-size: 15px; }
+.private-peek { margin-top: 5px; padding: 5px; }
+.local-token-row { margin-top: 5px; }
+.local-office-row { margin-top: 5px; gap: 2px; }
+.owned-office { min-height: 21px; grid-template-columns: 22px 1fr; }
+.local-player-mat .character-text-card { padding: 7px 7px 37px; overflow: hidden; }
+.character-text-card strong { font-size: 13px; }
+.character-text-card p { max-height: 34px; margin-top: 4px; overflow: hidden; font-size: 7px; }
+.local-player-mat .character-text-card button { bottom: 6px; left: 7px; right: 7px; padding: 6px; }
+.local-portfolio { padding: 7px; overflow: hidden; }
+.local-portfolio > div { min-height: 25px; margin: 3px 0; }
+.local-portfolio p { margin: 3px 0; }
+.local-phase-panel { min-height: 0; overflow: hidden; }
+.local-phase-panel .phase-action-grid { height: 132px; min-height: 0; padding: 6px; overflow: hidden; }
+.local-phase-panel .nav-card { width: 104px; min-height: 92px; padding: 7px; }
+.local-phase-panel .nav-card strong { font-size: 11px; }.local-phase-panel .nav-card small { height: 22px; }
+.local-manual-tools { padding: 7px; overflow: hidden; }
+.local-manual-tools .manual-tokens { margin-top: 6px; gap: 4px; }
+.local-manual-tools .manual-tokens button { height: 27px; }
+.local-player-mat .event-log { max-height: 158px; }
+
+@media (max-height: 760px) {
+  .prototype-shell { grid-template-rows: 50px minmax(0, 1fr) 154px; }
+  .prototype-topbar { height: 50px; }
+  .local-player-mat { height: 154px; grid-template-columns: 140px 215px 132px minmax(330px, 1fr) 105px 135px; }
+  .local-phase-panel .phase-action-grid { height: 112px; }
+  .local-phase-panel .nav-card { min-height: 82px; }
+  .character-text-card p { max-height: 23px; }
+  .seat-resume { display: none; }
+  .map-edge-dock .card-zone button { min-height: 21px; }
+}

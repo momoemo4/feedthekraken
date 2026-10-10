@@ -267,7 +267,6 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
   const [viewerId, setViewerId] = useState("P1");
   const [selectedBadge, setSelectedBadge] = useState<BadgeRole | null>("lieutenant");
   const [correctionMode, setCorrectionMode] = useState(false);
-  const [toolsExpanded, setToolsExpanded] = useState(true);
 
   const viewer = game.players.find((player) => player.id === viewerId) ?? game.players[0];
   const captain = game.players.find((player) => player.id === game.captainId)!;
@@ -1007,28 +1006,6 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
         <button type="button" title="Reset prototype" aria-label="Reset prototype" className="prototype-ghost icon-control" onClick={restartPrototype}><i>↻</i><span>RESET</span></button>
       </header>
 
-      <section className="shared-object-rack" aria-label="Shared table objects">
-        <div className="shared-object-rack__label"><small>SHARED TABLE</small><strong>Drag, take or return</strong></div>
-        <div className="shared-role-slot"><span>OFFICER BADGES</span>{roleTray}</div>
-        <button className="table-object table-object--gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}><i>●</i><span>GUN SUPPLY</span><b>TAKE +1</b></button>
-        <button title="Beer is the Off-Duty marker" className={`table-object table-object--beer ${viewer.beer > 0 ? "is-on-mat" : ""}`} onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}><i>◆</i><span>BEER · OFF-DUTY</span><b>TAKE +1</b></button>
-      </section>
-
-      <nav className={`companion-action-bar ${toolsExpanded ? "is-expanded" : ""}`} aria-label="Companion actions">
-        <button className="companion-action-bar__toggle" type="button" onClick={() => setToolsExpanded((value) => !value)} title="Show or hide companion actions"><i>⚙</i><span>TABLE ACTIONS</span><b>{toolsExpanded ? "−" : "+"}</b></button>
-        {toolsExpanded && <div className="companion-action-bar__tools">
-          <CompanionTool icon="⌕" label="Cabin Search" active={mapToolActive("CABIN_SEARCH")} disabled={!canUseMapTool("CABIN_SEARCH")} onClick={() => openMapActionTool("CABIN_SEARCH")} />
-          <CompanionTool icon="≋" label="Flogging" active={mapToolActive("FLOGGING")} disabled={!canUseMapTool("FLOGGING")} onClick={() => openMapActionTool("FLOGGING")} />
-          <CompanionTool icon="✂" label="Cut Tongue" active={mapToolActive("OFF_WITH_THE_TONGUE")} disabled={!canUseMapTool("OFF_WITH_THE_TONGUE")} onClick={() => openMapActionTool("OFF_WITH_THE_TONGUE")} />
-          <CompanionTool icon="☠" label="Feed Kraken" active={mapToolActive("FEED_THE_KRAKEN")} disabled={!canUseMapTool("FEED_THE_KRAKEN")} onClick={() => openMapActionTool("FEED_THE_KRAKEN")} />
-          <CompanionTool icon="☽" label="Conversion" active={ritualToolActive("CONVERSION")} disabled={!canUseRitualTool("CONVERSION")} onClick={() => openRitualTool("CONVERSION")} />
-          <CompanionTool icon="⚔" label="Cult Guns" active={ritualToolActive("CULT_GUNS_STASH")} disabled={!canUseRitualTool("CULT_GUNS_STASH")} onClick={() => openRitualTool("CULT_GUNS_STASH")} />
-          <CompanionTool icon="◉" label="Cult Search" active={ritualToolActive("CULT_CABIN_SEARCH")} disabled={!canUseRitualTool("CULT_CABIN_SEARCH")} onClick={() => openRitualTool("CULT_CABIN_SEARCH")} />
-          <CompanionTool icon="↘" label="Jump Ship" active={game.phase === "NAVIGATOR_CHOOSE" && viewerId === game.navigatorId} disabled={game.phase !== "NAVIGATOR_CHOOSE" || viewerId !== game.navigatorId} onClick={jumpOverboard} />
-        </div>}
-        {correctionMode && <small>Correction mode: manually open any table action.</small>}
-      </nav>
-
       <section className="prototype-table">
         <aside className="player-rail player-rail--left">{leftPlayers.map(renderPlayer)}</aside>
 
@@ -1041,42 +1018,68 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <div className="prototype-map-frame">
             <CleanMap cells={longJourney.cells} activeId={game.selectedHexId} onSelect={(id) => setGame((current) => ({ ...current, selectedHexId: id }))} showArrows showLabels animate shipHexId={game.shipHexId} />
             {correctionMode && <button className="ship-correction" onClick={moveShipCorrection}>MOVE SHIP TO {game.selectedHexId}</button>}
-          </div>
-          <section className="board-object-dock" aria-label="Card decks and Captain's Logbook">
-            <section className="card-zone card-zone--navigation" aria-label="Navigation deck">
+
+            <aside className="map-edge-dock map-edge-dock--left" aria-label="Shared objects and Navigation cards">
+              <section className="edge-object-panel edge-object-panel--badges">
+                <header><span>OFFICER BADGES</span></header>
+                <div className="shared-role-slot">{roleTray}</div>
+              </section>
+              <div className="edge-supplies">
+                <button className="table-object table-object--gun" title="Take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}><i>●</i><span>GUNS</span><b>+1</b></button>
+                <button title="Beer is the Off-Duty marker" className={`table-object table-object--beer ${viewer.beer > 0 ? "is-on-mat" : ""}`} onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}><i>◆</i><span>BEER</span><b>+1</b></button>
+              </div>
+              <section className="card-zone card-zone--navigation" aria-label="Navigation deck">
               <header><span>NAVIGATION</span><b>{stats.deck}</b></header>
               <div className="deck-stack deck-stack--navigation"><i /><i /><strong>N</strong></div>
               <button disabled={!canDrawNavigation} onClick={() => activeDrawRole && drawForRole(activeDrawRole)}>DRAW 2</button>
               {correctionMode && <button className="card-zone__minor" disabled={!activeDrawRole || activeDrawOwnerId !== viewerId} onClick={drawOneCorrection}>DRAW 1</button>}
-            </section>
+              </section>
 
-            <section className="card-zone card-zone--deepsea" aria-label="Deep Sea discard">
+              <section className="card-zone card-zone--deepsea" aria-label="Deep Sea discard">
               <header><span>DEEP SEA</span><b>{stats.deepSea}</b></header>
               <div className="discard-fan"><i /><i /><i /></div>
               <small>FACE DOWN</small>
               {correctionMode && <button className="card-zone__minor" onClick={shuffleDeepSeaNow}>SHUFFLE NOW</button>}
-            </section>
+              </section>
+            </aside>
 
-            <section className="card-zone card-zone--logbook" aria-label="Captain's Logbook">
-              <header><span>CAPTAIN'S LOGBOOK</span><b>{game.logbook.length}/2</b></header>
-              <div className="logbook-slots">
-                {[0, 1].map((slot) => <i className={game.logbook[slot] ? "has-card" : ""} key={slot}>{game.logbook[slot] ? "?" : "+"}</i>)}
+            <aside className="map-edge-dock map-edge-dock--right" aria-label="Table actions, Logbook and Ritual cards">
+              <nav className="companion-action-bar" aria-label="Companion actions">
+                <header><i>⚙</i><span>TABLE ACTIONS</span>{correctionMode && <b>EDIT</b>}</header>
+                <div className="companion-action-bar__tools">
+                  <CompanionTool icon="⌕" label="Cabin Search" active={mapToolActive("CABIN_SEARCH")} disabled={!canUseMapTool("CABIN_SEARCH")} onClick={() => openMapActionTool("CABIN_SEARCH")} />
+                  <CompanionTool icon="≋" label="Flogging" active={mapToolActive("FLOGGING")} disabled={!canUseMapTool("FLOGGING")} onClick={() => openMapActionTool("FLOGGING")} />
+                  <CompanionTool icon="✂" label="Cut Tongue" active={mapToolActive("OFF_WITH_THE_TONGUE")} disabled={!canUseMapTool("OFF_WITH_THE_TONGUE")} onClick={() => openMapActionTool("OFF_WITH_THE_TONGUE")} />
+                  <CompanionTool icon="☠" label="Feed Kraken" active={mapToolActive("FEED_THE_KRAKEN")} disabled={!canUseMapTool("FEED_THE_KRAKEN")} onClick={() => openMapActionTool("FEED_THE_KRAKEN")} />
+                  <CompanionTool icon="☽" label="Conversion" active={ritualToolActive("CONVERSION")} disabled={!canUseRitualTool("CONVERSION")} onClick={() => openRitualTool("CONVERSION")} />
+                  <CompanionTool icon="⚔" label="Cult Guns" active={ritualToolActive("CULT_GUNS_STASH")} disabled={!canUseRitualTool("CULT_GUNS_STASH")} onClick={() => openRitualTool("CULT_GUNS_STASH")} />
+                  <CompanionTool icon="◉" label="Cult Search" active={ritualToolActive("CULT_CABIN_SEARCH")} disabled={!canUseRitualTool("CULT_CABIN_SEARCH")} onClick={() => openRitualTool("CULT_CABIN_SEARCH")} />
+                  <CompanionTool icon="↘" label="Jump Ship" active={game.phase === "NAVIGATOR_CHOOSE" && viewerId === game.navigatorId} disabled={game.phase !== "NAVIGATOR_CHOOSE" || viewerId !== game.navigatorId} onClick={jumpOverboard} />
+                </div>
+              </nav>
+
+              <section className="card-zone card-zone--logbook" aria-label="Captain's Logbook">
+                <header><span>LOGBOOK</span><b>{game.logbook.length}/2</b></header>
+                <div className="logbook-slots">
+                  {[0, 1].map((slot) => <i className={game.logbook[slot] ? "has-card" : ""} key={slot}>{game.logbook[slot] ? "?" : "+"}</i>)}
+                </div>
+                <small>SHUFFLED</small>
+              </section>
+
+              <div className="edge-ritual-row">
+                <section className="card-zone card-zone--ritual" aria-label="Ritual deck">
+                  <header><span>RITUAL</span><b>{stats.rituals}</b></header>
+                  <div className="deck-stack deck-stack--ritual"><i /><i /><strong>☽</strong></div>
+                  {correctionMode && <button className="card-zone__minor" onClick={drawRitualCorrection}>DRAW</button>}
+                </section>
+
+                <section className="card-zone card-zone--used" aria-label="Used ritual cards">
+                  <header><span>USED</span><b>{game.usedRituals.length}</b></header>
+                  <div className="used-ritual-list">{game.usedRituals.length ? game.usedRituals.map((id) => <span key={id}>{RITUAL_CARD_DEFINITIONS[id].name}</span>) : <small>—</small>}</div>
+                </section>
               </div>
-              <small>SHUFFLED BEFORE NAVIGATOR SEES IT</small>
-            </section>
-
-            <section className="card-zone card-zone--ritual" aria-label="Ritual deck">
-              <header><span>RITUAL DECK</span><b>{stats.rituals}</b></header>
-              <div className="deck-stack deck-stack--ritual"><i /><i /><strong>☽</strong></div>
-              <small>PRIVATE CEREMONY</small>
-              {correctionMode && <button className="card-zone__minor" onClick={drawRitualCorrection}>DRAW RITUAL</button>}
-            </section>
-
-            <section className="card-zone card-zone--used" aria-label="Used ritual cards">
-              <header><span>USED RITUALS</span><b>{game.usedRituals.length}</b></header>
-              <div className="used-ritual-list">{game.usedRituals.length ? game.usedRituals.map((id) => <span key={id}>{RITUAL_CARD_DEFINITIONS[id].name}</span>) : <small>EMPTY</small>}</div>
-            </section>
-          </section>
+            </aside>
+          </div>
         </section>
 
         <aside className="player-rail player-rail--right">
