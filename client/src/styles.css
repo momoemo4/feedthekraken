@@ -1046,3 +1046,194 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
   .map-edge-dock .companion-tool i { width: 27px; height: 27px; font-size: 13px; }
   .edge-ritual-row { min-height: 88px; }
 }
+
+/* Wide-screen tabletop scale: use the empty sea margins for people and controls. */
+.prototype-shell {
+  grid-template-rows: 64px minmax(0, 1fr) clamp(220px, 19vh, 260px);
+}
+.prototype-topbar {
+  height: 64px;
+  grid-template-columns: minmax(280px, 1fr) minmax(220px, auto) minmax(240px, 310px) 96px 96px 96px;
+}
+.prototype-brand > span { width: 44px; height: 44px; font-size: 21px; }
+.prototype-brand strong { font-size: clamp(17px, .8vw, 21px); }
+.prototype-brand small { font-size: clamp(9px, .42vw, 11px); }
+.phase-readout { min-width: 220px; }
+.phase-readout span, .viewer-switch span { font-size: clamp(9px, .42vw, 11px); }
+.phase-readout strong { font-size: clamp(13px, .6vw, 16px); }
+.viewer-switch select { height: 38px; font-size: clamp(11px, .5vw, 13px); }
+.prototype-ghost, .correction-toggle { height: 39px; font-size: clamp(9px, .45vw, 12px); }
+
+.prototype-table {
+  grid-template-columns: clamp(260px, 18vw, 460px) minmax(0, 1fr) clamp(260px, 18vw, 460px);
+  gap: 10px;
+  padding: 9px 12px;
+}
+.prototype-board { grid-template-rows: 40px minmax(0, 1fr); gap: 8px; }
+.table-phase-strip { height: 40px; grid-template-columns: 78px auto 1fr; padding: 0 14px; }
+.table-phase-strip span { font-size: clamp(9px, .43vw, 11px); }
+.table-phase-strip strong { font-size: clamp(14px, .65vw, 17px); }
+
+.player-rail { gap: 9px; }
+.player-seat {
+  padding: 12px clamp(82px, 24%, 112px) 10px 70px;
+  border-width: 1px;
+  background: linear-gradient(135deg, rgba(20,52,50,.98), rgba(5,28,29,.98));
+}
+.player-seat:hover { border-color: rgba(236,211,142,.65); background: linear-gradient(135deg, rgba(27,64,60,.98), rgba(7,34,35,.98)); }
+.seat-avatar { left: 12px; top: 12px; width: 48px; height: 48px; font-size: 21px; }
+.player-seat header { grid-template-columns: 30px 1fr auto; gap: 8px; }
+.player-seat header span { font-size: clamp(9px, .42vw, 11px); }
+.player-seat header b { font-size: clamp(18px, .82vw, 22px); }
+.player-seat header i { width: 9px; height: 9px; }
+.seat-roles { left: 19px; top: 67px; width: 33px; gap: 5px; }
+.mini-role { min-width: 29px; width: 29px; height: 29px; font-size: 12px; }
+.seat-tokens { gap: 7px; margin-top: 10px; }
+.seat-tokens span { min-height: 39px; gap: 9px; font-size: clamp(10px, .46vw, 12px); }
+.seat-tokens span i { font-size: 15px; }
+.seat-tokens b { font-size: clamp(17px, .7vw, 20px); }
+.seat-status { gap: 6px; margin-top: 7px; }
+.seat-status span { min-width: 29px; min-height: 28px; padding: 5px 9px; font-size: clamp(9px, .42vw, 11px); }
+.seat-character-card { top: 48px; right: 11px; width: clamp(70px, 22%, 98px); height: 61px; padding: 7px; }
+.seat-character-card small, .seat-character-card b { font-size: clamp(8px, .38vw, 10px); }
+.seat-resume {
+  min-height: 41px;
+  height: 41px;
+  margin-top: 8px;
+  padding: 7px 5px 0;
+  gap: 5px;
+  border: 1px dashed rgba(219,197,137,.13);
+}
+.seat-resume small { font-size: 9px; }
+.seat-resume .resume-card { width: 27px; height: 34px; font-size: 10px; }
+
+.map-edge-dock {
+  width: clamp(210px, 20%, 300px);
+  gap: 10px;
+}
+.edge-object-panel > header,
+.map-edge-dock .companion-action-bar > header {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: clamp(9px, .42vw, 11px);
+}
+.edge-object-panel .shared-role-slot { padding: 9px; }
+.edge-object-panel .role-tray { gap: 8px; }
+.edge-object-panel .role-badge { height: 55px; padding: 0 7px; font-size: clamp(8px, .38vw, 10px); }
+.edge-object-panel .role-badge span { font-size: 19px; }
+.edge-supplies { gap: 9px; }
+.edge-supplies .table-object { min-height: 69px; height: 69px; grid-template-rows: 41px auto; padding: 7px; }
+.edge-supplies .table-object i { width: 39px; height: 39px; font-size: 19px; }
+.edge-supplies .table-object span { font-size: clamp(9px, .4vw, 11px); }
+.map-edge-dock .card-zone { padding: 9px; }
+.map-edge-dock .card-zone header { min-height: 31px; }
+.map-edge-dock .card-zone header span { font-size: clamp(9px, .42vw, 11px); }
+.map-edge-dock .card-zone header b { font-size: 14px; }
+.map-edge-dock .deck-stack { width: 57px; height: 73px; margin: 9px auto 6px; }
+.map-edge-dock .deck-stack strong { font-size: 21px; }
+.map-edge-dock .card-zone button { min-height: 42px; margin-top: 7px; font-size: clamp(9px, .42vw, 11px); }
+.map-edge-dock .discard-fan { width: 82px; height: 52px; }
+.map-edge-dock .logbook-slots i { width: 48px; height: 64px; font-size: 16px; }
+.edge-ritual-row { min-height: 126px; }
+.edge-ritual-row .deck-stack { width: 47px; height: 61px; }
+.edge-ritual-row .used-ritual-list { max-height: 87px; }
+.edge-ritual-row .used-ritual-list span { font-size: 8px; }
+.edge-ritual-row .used-ritual-list small { font-size: 9px; }
+.map-edge-dock .companion-action-bar__tools { gap: 8px; padding: 9px; }
+.map-edge-dock .companion-tool {
+  min-height: 61px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 8px;
+  padding: 7px;
+}
+.map-edge-dock .companion-tool i { width: 39px; height: 39px; font-size: 19px; }
+.map-edge-dock .companion-tool span { font-size: clamp(8px, .38vw, 10px); white-space: normal; }
+.companion-tool:disabled { opacity: .5; }
+
+.local-player-mat {
+  height: 100%;
+  grid-template-columns: 1fr 1.35fr 1.08fr 2.15fr .95fr 1.1fr;
+  gap: 10px;
+  padding: 11px 12px;
+}
+.local-player-mat__identity { padding: 13px; }
+.local-player-mat__identity small { font-size: clamp(9px, .42vw, 11px); }
+.local-player-mat__identity strong { margin-top: 7px; font-size: clamp(23px, 1.05vw, 28px); }
+.private-peek { min-height: 42px; margin-top: 10px; font-size: clamp(10px, .46vw, 12px); }
+.local-token-row { margin-top: 9px; gap: 7px; }
+.local-token-row span, .local-token-row i { min-width: 42px; padding: 7px 9px; font-size: clamp(10px, .45vw, 12px); }
+.local-office-row { margin-top: 9px; gap: 7px; }
+.owned-office { min-height: 39px; grid-template-columns: 36px 1fr; font-size: clamp(9px, .42vw, 11px); }
+.owned-office i { width: 34px; height: 34px; font-size: 16px; }
+.local-player-mat .character-text-card { padding: 13px 13px 53px; }
+.character-text-card small { font-size: clamp(9px, .42vw, 11px); }
+.character-text-card strong { font-size: clamp(20px, .9vw, 24px); }
+.character-text-card p { max-height: 81px; margin-top: 9px; font-size: clamp(10px, .48vw, 13px); }
+.local-player-mat .character-text-card button { min-height: 36px; font-size: clamp(9px, .42vw, 11px); }
+.local-portfolio { padding: 13px; }
+.local-portfolio header { font-size: clamp(9px, .42vw, 11px); }
+.local-portfolio > div { min-height: 48px; margin: 8px 0; }
+.local-portfolio > div small, .local-portfolio p { font-size: clamp(9px, .42vw, 11px); }
+.local-phase-panel { grid-template-rows: 42px 1fr; }
+.local-phase-panel > header { padding: 0 14px; font-size: clamp(9px, .42vw, 11px); }
+.local-phase-panel .phase-action-grid { height: auto; padding: 13px; gap: 13px; }
+.local-phase-panel .phase-action-grid h3 { font-size: clamp(19px, .85vw, 23px); }
+.local-phase-panel .phase-action-grid p { font-size: clamp(10px, .46vw, 12px); }
+.local-phase-panel .nav-card { width: 146px; min-height: 143px; padding: 11px; }
+.local-phase-panel .nav-card strong { font-size: 17px; }
+.local-phase-panel .nav-card small { height: 35px; font-size: 10px; }
+.local-manual-tools { padding: 13px; }
+.local-manual-tools header span, .local-manual-tools header small { font-size: clamp(9px, .42vw, 11px); }
+.local-manual-tools .manual-tokens { margin-top: 12px; gap: 9px; }
+.local-manual-tools .manual-tokens button { height: 45px; font-size: clamp(11px, .5vw, 14px); }
+.local-player-mat .event-log { max-height: 230px; }
+.event-log summary, .event-log header { height: 41px; font-size: clamp(9px, .42vw, 11px); }
+.local-player-mat .event-log p { padding: 9px 11px; font-size: clamp(9px, .42vw, 11px); }
+
+@media (max-width: 1600px) {
+  .prototype-table { grid-template-columns: clamp(235px, 19vw, 305px) minmax(0, 1fr) clamp(235px, 19vw, 305px); }
+  .map-edge-dock { width: clamp(168px, 19%, 205px); }
+  .player-seat { padding-left: 56px; padding-right: 72px; }
+  .seat-avatar { width: 38px; height: 38px; font-size: 17px; }
+  .seat-roles { left: 14px; top: 56px; }
+  .mini-role { min-width: 24px; width: 24px; height: 24px; }
+  .seat-character-card { width: 63px; height: 50px; }
+  .map-edge-dock .companion-tool { min-height: 48px; grid-template-columns: 32px minmax(0, 1fr); }
+  .map-edge-dock .companion-tool i { width: 31px; height: 31px; font-size: 15px; }
+}
+
+@media (max-height: 900px) {
+  .prototype-shell { grid-template-rows: 56px minmax(0, 1fr) 190px; }
+  .prototype-topbar { height: 56px; }
+  .local-player-mat { padding: 8px 9px; gap: 7px; }
+  .local-player-mat__identity, .local-portfolio, .local-manual-tools { padding: 8px; }
+  .local-player-mat__identity strong { font-size: 19px; }
+  .private-peek { min-height: 31px; margin-top: 6px; padding: 5px; }
+  .local-token-row, .local-office-row { margin-top: 5px; }
+  .local-token-row span, .local-token-row i { min-width: 32px; padding: 5px; }
+  .owned-office { min-height: 30px; }
+  .local-player-mat .character-text-card { padding: 8px 8px 41px; }
+  .character-text-card strong { font-size: 18px; }
+  .character-text-card p { max-height: 43px; margin-top: 5px; font-size: 9px; }
+  .local-player-mat .character-text-card button { min-height: 28px; }
+  .local-phase-panel { grid-template-rows: 32px 1fr; }
+  .local-phase-panel .phase-action-grid { padding: 8px; gap: 8px; }
+  .local-phase-panel .nav-card { width: 115px; min-height: 105px; padding: 7px; }
+  .local-manual-tools .manual-tokens { margin-top: 7px; gap: 5px; }
+  .local-manual-tools .manual-tokens button { height: 31px; }
+  .player-seat { padding-top: 8px; padding-bottom: 6px; }
+  .seat-avatar { top: 8px; }
+  .seat-tokens { margin-top: 5px; }
+  .seat-tokens span { min-height: 29px; }
+  .seat-status { margin-top: 4px; }
+  .seat-resume { display: none; }
+  .map-edge-dock { top: 7px; bottom: 7px; gap: 5px; }
+  .edge-object-panel > header, .map-edge-dock .companion-action-bar > header { min-height: 27px; }
+  .edge-object-panel .role-badge { height: 41px; }
+  .edge-supplies .table-object { min-height: 51px; height: 51px; }
+  .map-edge-dock .deck-stack { width: 41px; height: 53px; margin: 4px auto 2px; }
+  .map-edge-dock .card-zone button { min-height: 29px; margin-top: 3px; }
+  .map-edge-dock .companion-action-bar__tools { gap: 4px; padding: 5px; }
+  .map-edge-dock .companion-tool { min-height: 41px; padding: 4px; }
+  .edge-ritual-row { min-height: 91px; }
+}
