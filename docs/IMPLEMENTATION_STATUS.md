@@ -27,6 +27,7 @@ Status date: 2026-10-10. `TESTED` is added only after the command has actually p
 | Responsive tabletop and Character presentation | IMPLEMENTED / TESTED / LOCAL | Five-zone private dock prevents action/token/log overlap on desktop and laptop breakpoints; the viewer's Gun supply is a prominent physical object with event/card −/+ controls; 22 original Character portraits use an atlas, while ability copy appears on hover or keyboard focus. |
 | Wooden tabletop objects | IMPLEMENTED / TESTED / LOCAL | Original hand-painted atlas v3 supplies a naval Captain tricorne with anchor (no pirate skull), five-point Lieutenant star, Navigator helm wheel, flintlock Gun, Beer and ship pieces. |
 | Sea-map fit and Character card | IMPLEMENTED / TESTED / LOCAL | The sea art now meets its frame without a decorative dead border, receives more of the laptop viewport, and uses a larger near-static ship token. Character portraits keep their square source ratio inside a redesigned horizontal card; rules remain hover/focus-only. |
+| Table-action cancel and Beer placement | IMPLEMENTED / TESTED / LOCAL | Off-Duty Beer is taken from the Officer dock and appears as a large physical object beside the viewer's hat/badge. Manual map/Ritual actions keep a pre-action snapshot; `CLOSE`/`DISCARD` restores it, including target, allocations and draft log entries. Function buttons use distinct inspect/penalty/Ritual/escape treatments. |
 | Quick Journey | TODO / UNVERIFIED | Requires a clear reference image. |
 
 ## Milestone boundary
@@ -41,6 +42,7 @@ This repository implements Milestone 0 and the audit tooling portion of Mileston
 - Browser flow QA: Captain/Lieutenant private hands, hidden non-owner views, shuffled Navigator Logbook, public reveal, active Ritual, used Ritual pile, and atlas crop loading verified.
 - Responsive browser QA: 1280×720 and 1920×1080 reported zero body overflow; all five private-dock regions and rail Character cards stayed within their parents; Character ability focus reveal and Gun 3→2→3 adjustment passed.
 - Latest responsive browser QA: at 1280×720 the table is 512px tall and private mat 158px tall with body exactly 1280×720; at 1920×1080 body remained exactly viewport-sized. Sea-map zoom, larger ship, square portrait crop and horizontal Character card were visually inspected.
+- Panel overflow audit: all critical 1280×720 table/topbar/action/card/role/Character boundaries reported zero horizontal or vertical overflow. Beer take/return placement and Cabin Search open → target draft → close were exercised; close restored the prior phase and event count.
 - Wooden-object browser QA: atlas v3 crop positions verified for the anchor Captain hat, Lieutenant star, Navigator helm wheel, shared supplies and local officer object.
 - Local client: HTTP 200.
 - Local API health: `{ "ok": true, "milestone": 1, "mapVerified": false }`.
