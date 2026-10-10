@@ -138,7 +138,7 @@ input[type="range"] { width: 100%; height: 3px; margin: 0 0 16px; accent-color: 
 .victory-icon circle:not(.victory-icon__eye) { fill: rgba(224,208,165,.08); }
 .victory-icon__eye { fill: #e2d2a7; stroke: none; }
 .clean-ship { pointer-events: none; transform-box: fill-box; transform-origin: center; filter: drop-shadow(0 7px 5px rgba(0,25,31,.5)); }
-.clean-map.is-animated .clean-ship { animation: ship-bob 3s ease-in-out infinite; }
+.clean-map.is-animated .clean-ship { animation: ship-bob 5.2s ease-in-out infinite; }
 .clean-ship__shadow { fill: rgba(0,33,42,.34); }.clean-ship__hull { fill: #5c3027; stroke: #f1cf8e; stroke-width: 3; }.clean-ship__sail { fill: #efe4bd; stroke: #4c4439; stroke-width: 3; }.clean-ship__flag { fill: var(--red); stroke: #50251f; stroke-width: 2; }
 .clean-zone-label { pointer-events: none; filter: url(#roughInk); }
 .clean-zone-label path { fill: none; stroke: rgba(218,201,157,.48); stroke-width: 2; }
@@ -148,7 +148,7 @@ input[type="range"] { width: 100%; height: 3px; margin: 0 0 16px; accent-color: 
 @keyframes water-drift { from { transform: translateX(0); } to { transform: translateX(90px); } }
 @keyframes token-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
 @keyframes victory-pulse { 0%, 100% { scale: 1; } 50% { scale: 1.06; } }
-@keyframes ship-bob { 0%, 100% { translate: 0 0; rotate: -1deg; } 50% { translate: 0 -5px; rotate: 1deg; } }
+@keyframes ship-bob { 0%, 100% { translate: 0 0; rotate: -.2deg; } 50% { translate: 0 -1.5px; rotate: .2deg; } }
 @media (prefers-reduced-motion: reduce) { .clean-map * { animation: none !important; } }
 .reference-empty path { fill: #d0bb80; fill-opacity: .035; stroke: #d0bb80; stroke-opacity: .15; stroke-width: 2; stroke-dasharray: 8 10; }
 .reference-empty text { fill: #e3d3a7; fill-opacity: .58; text-anchor: middle; font: 700 18px "Libre Caslon Text", Georgia, serif; letter-spacing: .08em; }
@@ -1832,7 +1832,7 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
   padding: 0 !important;
   border: 0;
   background-color: #0d2b2c !important;
-  background-image: url('/art/components/wooden-game-pieces-atlas-v1.png') !important;
+  background-image: url('/art/components/wooden-game-pieces-atlas-v3.png') !important;
   background-repeat: no-repeat !important;
   background-size: 300% 200% !important;
   box-shadow: none;
@@ -1885,7 +1885,7 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
 .owned-office--navigator i.wood-piece {
   border-radius: 7px;
   background-color: #0d2b2c !important;
-  background-image: url('/art/components/wooden-game-pieces-atlas-v1.png') !important;
+  background-image: url('/art/components/wooden-game-pieces-atlas-v3.png') !important;
   background-size: 300% 200% !important;
 }
 .local-office-display .owned-office i.wood-piece { border-radius: 9px; }
@@ -1893,7 +1893,7 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
 .local-gun-display > i.wood-piece {
   width: 40px;
   height: 40px;
-  background-image: url('/art/components/wooden-game-pieces-atlas-v1.png') !important;
+  background-image: url('/art/components/wooden-game-pieces-atlas-v3.png') !important;
   background-position: 0 100% !important;
   background-size: 300% 200% !important;
 }
@@ -1909,4 +1909,83 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
   .edge-supplies .table-object i.wood-piece { width: 32px; height: 32px; }
   .seat-tokens span > .wood-piece { width: 23px; height: 23px; }
   .local-gun-display > i.wood-piece { width: 32px; height: 32px; }
+}
+
+/* Board-fit pass: the sea is the table surface, not a framed picture. */
+.prototype-map-frame {
+  border: 0;
+  background: #173f4a;
+  box-shadow: none;
+}
+.prototype-map-frame .clean-map {
+  width: 100%;
+  height: 100%;
+  background: #173f4a;
+}
+
+/* Keep portrait art square and let the Character card remain a horizontal card. */
+.local-player-mat .character-art-card {
+  display: block;
+  padding: 8px 8px 42px 58%;
+  background: linear-gradient(120deg, #172d2b, #091b1b 70%);
+}
+.character-art-card > .character-portrait {
+  z-index: 0;
+  top: 8px;
+  right: auto;
+  bottom: auto;
+  left: 8px;
+  width: calc(58% - 14px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(236,211,143,.48);
+  border-radius: 48% 48% 5px 5px;
+  box-shadow: inset 0 0 0 3px rgba(5,19,18,.55), 0 5px 14px rgba(0,0,0,.35);
+}
+.character-art-card::after {
+  z-index: 0;
+  left: 56%;
+  background: linear-gradient(90deg, rgba(3,14,14,.05), rgba(3,14,14,.92));
+}
+.character-art-card > span,
+.character-art-card > strong,
+.character-art-card > small { z-index: 2; }
+.character-art-card > strong {
+  position: relative;
+  inset: auto;
+  margin-top: 8px;
+  line-height: 1.05;
+}
+.character-art-card__hint {
+  position: relative !important;
+  inset: auto;
+  display: block;
+  margin-top: 10px;
+  line-height: 1.35;
+}
+.character-art-card__ability { z-index: 4; inset: 7px 7px 39px; }
+.local-player-mat .character-art-card > button { bottom: 7px; left: 8px; right: 8px; }
+
+.seat-character-card .character-portrait {
+  top: 3px;
+  right: auto;
+  bottom: 3px;
+  left: 3px;
+  width: auto;
+  aspect-ratio: 1;
+}
+.seat-character-card small,
+.seat-character-card b { left: 54%; }
+
+@media (max-width: 1366px) {
+  .prototype-table { grid-template-columns: 190px minmax(0, 1fr) 190px; gap: 5px; padding-right: 5px; padding-left: 5px; }
+  .map-edge-dock { width: 142px; }
+}
+
+@media (max-height: 760px) {
+  .prototype-shell { grid-template-rows: 50px minmax(0, 1fr) 158px; }
+  .local-player-mat .character-art-card { padding: 7px 7px 38px 57%; }
+  .character-art-card > .character-portrait { top: 7px; left: 7px; width: calc(57% - 12px); }
+  .character-art-card > strong { font-size: 15px; }
+  .character-art-card__hint { margin-top: 7px; }
+  .character-art-card__ability { inset: 6px 6px 35px; }
 }

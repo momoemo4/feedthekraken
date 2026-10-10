@@ -69,8 +69,8 @@ function ActionIcon({ action }: { action: NonNullable<HexCell["action"]> }) {
 function ShipIcon({ x, y }: { x: number; y: number }) {
   return (
     <g className="clean-ship" transform={`translate(${x} ${y})`}>
-      <ellipse cy="33" rx="31" ry="9" className="clean-ship__shadow" />
-      <image href="/art/components/ship-map-token-v2.png" x="-39" y="-52" width="78" height="98" preserveAspectRatio="xMidYMid meet" />
+      <ellipse cy="43" rx="40" ry="11" className="clean-ship__shadow" />
+      <image href="/art/components/ship-map-token-v2.png" x="-52" y="-69" width="104" height="130" preserveAspectRatio="xMidYMid meet" />
     </g>
   );
 }
@@ -99,7 +99,7 @@ export function CleanMap({
   const shipCenter = axialToPixel(shipCell.q, shipCell.r, radius, originX, originY);
 
   return (
-    <svg className={`map-svg clean-map ${animate ? "is-animated" : ""}`} viewBox="0 0 1200 1200" role="img" aria-label="Long Journey clean illustrated game map">
+    <svg className={`map-svg clean-map ${animate ? "is-animated" : ""}`} viewBox="28 18 1144 1164" role="img" aria-label="Long Journey clean illustrated game map">
       <defs>
         <linearGradient id="cleanSea" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#132b38" />
