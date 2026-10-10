@@ -9,7 +9,7 @@ import {
   type RitualCardId,
 } from "@shared/cards";
 import { CHARACTER_DEFINITIONS, CHARACTER_IDS, type CharacterId } from "@shared/characters";
-import type { Faction } from "@shared/types";
+import type { Faction, HexCell } from "@shared/types";
 import { CleanMap } from "./CleanMap";
 
 type PrototypePhase =
@@ -78,6 +78,9 @@ interface PrototypeState {
   ritualDeck: RitualCardId[];
   usedRituals: RitualCardId[];
   activeRitual: RitualCardId | null;
+  manualMapAction: HexCell["action"];
+  manualReturnPhase: PrototypePhase | null;
+  cultGunAllocation: Record<string, number>;
   actionTargetId: string | null;
   supplyCrossed: boolean;
   winner: "SAILOR" | "PIRATE" | "CULT" | null;
@@ -169,6 +172,9 @@ function createInitialState(): PrototypeState {
     ritualDeck: deterministicShuffle(createRitualDeck(), "prototype-ritual"),
     usedRituals: [],
     activeRitual: null,
+    manualMapAction: null,
+    manualReturnPhase: null,
+    cultGunAllocation: {},
     actionTargetId: null,
     supplyCrossed: false,
     winner: null,
@@ -186,6 +192,7 @@ function copyState(state: PrototypeState): PrototypeState {
     commitments: { ...state.commitments },
     mutinyLocked: { ...state.mutinyLocked },
     reactionPassed: { ...state.reactionPassed },
+    cultGunAllocation: { ...state.cultGunAllocation },
     navigationDeck: [...state.navigationDeck],
     deepSea: [...state.deepSea],
     captainHand: [...state.captainHand],
@@ -240,17 +247,36 @@ function NavigationCard({ card, action, onAction }: { card: NavigationCardInstan
   );
 }
 
+function CompanionTool({ icon, label, active, disabled, onClick }: { icon: string; label: string; active?: boolean; disabled?: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className={`companion-tool ${active ? "is-active" : ""}`}
+      title={label}
+      aria-label={label}
+      aria-pressed={active}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      <i aria-hidden="true">{icon}</i>
+      <span>{label}</span>
+    </button>
+  );
+}
+
 export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void }) {
   const [game, setGame] = useState(createInitialState);
   const [viewerId, setViewerId] = useState("P1");
   const [selectedBadge, setSelectedBadge] = useState<BadgeRole | null>("lieutenant");
   const [correctionMode, setCorrectionMode] = useState(false);
+  const [toolsExpanded, setToolsExpanded] = useState(true);
 
   const viewer = game.players.find((player) => player.id === viewerId) ?? game.players[0];
   const captain = game.players.find((player) => player.id === game.captainId)!;
   const lieutenant = game.players.find((player) => player.id === game.lieutenantId) ?? null;
   const navigator = game.players.find((player) => player.id === game.navigatorId) ?? null;
   const shipCell = longJourney.cells.find((cell) => cell.id === game.shipHexId)!;
+  const currentMapAction = game.manualMapAction ?? shipCell.action;
   const opponents = game.players.filter((player) => player.id !== viewerId);
   const leftPlayers = opponents.slice(0, 5);
   const rightPlayers = opponents.slice(5);
@@ -612,19 +638,49 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       if (!correctionMode || !current.ritualDeck.length) return current;
       const next = copyState(current);
       next.activeRitual = next.ritualDeck.shift() ?? null;
+      next.cultGunAllocation = {};
       next.phase = next.activeRitual ? "RITUAL" : next.phase;
       addEvent(next, `Host correction draws ${next.activeRitual ? RITUAL_CARD_DEFINITIONS[next.activeRitual].name : "no Ritual"}.`, "warn");
       return next;
     });
   };
 
+  const openMapActionTool = (action: Exclude<HexCell["action"], null>) => {
+    setGame((current) => {
+      const alreadyActive = current.phase === "MAP_ACTION" && (current.manualMapAction ?? longJourney.cells.find((cell) => cell.id === current.shipHexId)?.action) === action;
+      if (alreadyActive || !correctionMode) return current;
+      const next = copyState(current);
+      next.manualReturnPhase = current.phase;
+      next.manualMapAction = action;
+      next.actionTargetId = null;
+      next.phase = "MAP_ACTION";
+      addEvent(next, `Correction opens ${action.replaceAll("_", " ")} manually.`, "warn");
+      return next;
+    });
+  };
+
+  const openRitualTool = (ritual: RitualCardId) => {
+    setGame((current) => {
+      if ((current.phase === "RITUAL" && current.activeRitual === ritual) || !correctionMode) return current;
+      const next = copyState(current);
+      next.manualReturnPhase = current.phase;
+      next.activeRitual = ritual;
+      next.cultGunAllocation = {};
+      next.actionTargetId = null;
+      next.phase = "RITUAL";
+      addEvent(next, `Correction opens ${RITUAL_CARD_DEFINITIONS[ritual].name} manually.`, "warn");
+      return next;
+    });
+  };
+
   const resolveMapAction = () => {
     setGame((current) => {
-      if (current.phase !== "MAP_ACTION" || viewerId !== current.captainId || !current.actionTargetId) return current;
+      if (current.phase !== "MAP_ACTION" || (!correctionMode && viewerId !== current.captainId) || !current.actionTargetId) return current;
       const next = copyState(current);
       const cell = longJourney.cells.find((candidate) => candidate.id === next.shipHexId)!;
-      addEvent(next, `${playerName(next, next.captainId)} resolves ${cell.action?.replaceAll("_", " ")} on ${playerName(next, next.actionTargetId)}. Secret result remains on the Captain's phone.`, "action");
-      if (cell.action === "FEED_THE_KRAKEN") {
+      const action = next.manualMapAction ?? cell.action;
+      addEvent(next, `${playerName(next, next.captainId)} resolves ${action?.replaceAll("_", " ")} on ${playerName(next, next.actionTargetId)}. Secret result remains private.`, "action");
+      if (action === "FEED_THE_KRAKEN") {
         const target = next.players.find((player) => player.id === next.actionTargetId)!;
         target.eliminated = true;
         if (target.faction === "CULT_LEADER") {
@@ -633,18 +689,20 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           addEvent(next, "The sacrificed player was the Cult Leader. CULT wins.", "system");
           return next;
         }
-      } else if (cell.action === "CABIN_SEARCH") {
+      } else if (action === "CABIN_SEARCH") {
         const target = next.players.find((player) => player.id === next.actionTargetId)!;
         target.searched = true;
-      } else if (cell.action === "FLOGGING") {
+      } else if (action === "FLOGGING") {
         const target = next.players.find((player) => player.id === next.actionTargetId)!;
         target.flogged = true;
-      } else if (cell.action === "OFF_WITH_THE_TONGUE") {
+      } else if (action === "OFF_WITH_THE_TONGUE") {
         const target = next.players.find((player) => player.id === next.actionTargetId)!;
         target.silenced = true;
       }
       next.actionTargetId = null;
-      next.phase = "CARD_EFFECT";
+      next.manualMapAction = null;
+      next.phase = next.manualReturnPhase ?? "CARD_EFFECT";
+      next.manualReturnPhase = null;
       return next;
     });
   };
@@ -687,11 +745,26 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       } else if (card.effect === "CULT_UPRISING") {
         const ritual = next.ritualDeck.shift() ?? null;
         next.activeRitual = ritual;
+        next.cultGunAllocation = {};
         next.phase = ritual ? "RITUAL" : "ROUND_END";
         addEvent(next, ritual ? `Cult Uprising draws ${RITUAL_CARD_DEFINITIONS[ritual].name}.` : "Cult Uprising finds no Ritual cards remaining.", "system");
       } else {
         finishCardEffect(next);
       }
+      return next;
+    });
+  };
+
+  const adjustCultGunAllocation = (delta: number) => {
+    setGame((current) => {
+      if (current.phase !== "RITUAL" || current.activeRitual !== "CULT_GUNS_STASH" || !current.actionTargetId) return current;
+      if (!correctionMode && viewer.faction !== "CULT_LEADER") return current;
+      const targetId = current.actionTargetId;
+      const next = copyState(current);
+      const total = Object.values(next.cultGunAllocation).reduce((sum, value) => sum + value, 0);
+      const currentValue = next.cultGunAllocation[targetId] ?? 0;
+      if (delta > 0 && total >= 3) return current;
+      next.cultGunAllocation[targetId] = Math.max(0, currentValue + delta);
       return next;
     });
   };
@@ -707,14 +780,22 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
         target.faction = "CULTIST";
         addEvent(next, "CONVERSION HAS OCCURRED. The converted player remains secret.", "system");
       } else if (ritual === "CULT_GUNS_STASH") {
-        addEvent(next, "Cult's Guns Stash is marked resolved. Use tabletop +/− controls to distribute exactly 3 Guns.", "action");
+        const total = Object.values(next.cultGunAllocation).reduce((sum, value) => sum + value, 0);
+        if (total !== 3) return current;
+        Object.entries(next.cultGunAllocation).forEach(([playerId, amount]) => {
+          const target = next.players.find((player) => player.id === playerId);
+          if (target) target.guns += amount;
+        });
+        addEvent(next, "Cult's Guns Stash distributes exactly 3 Guns. Public totals update; recipients remain part of normal table information.", "action");
       } else {
         addEvent(next, "Cult Leader privately views the current factions of Captain, Lieutenant, and Navigator.", "secret");
       }
       next.usedRituals.push(ritual);
       next.activeRitual = null;
       next.actionTargetId = null;
-      next.phase = "ROUND_END";
+      next.cultGunAllocation = {};
+      next.phase = next.manualReturnPhase ?? "ROUND_END";
+      next.manualReturnPhase = null;
       return next;
     });
   };
@@ -787,30 +868,28 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           if (role) assignBadge(role, player.id);
         }}
       >
-        <header><span>Seat {player.seat}</span><b>{player.name}</b><i className={player.connected ? "is-online" : ""} /></header>
-        <div className="seat-roles">{roles.map((role) => <span className={`mini-role mini-role--${role}`} key={role}>{role[0].toUpperCase()}</span>)}</div>
+        <div className="seat-avatar" aria-hidden="true">{player.name.slice(0, 1)}</div>
+        <header><span>#{player.seat}</span><b>{player.name}</b><i title={player.connected ? "Connected" : "Disconnected"} className={player.connected ? "is-online" : ""} /></header>
+        <div className="seat-roles">{roles.map((role) => <span title={role} className={`mini-role mini-role--${role}`} key={role}>{role === "captain" ? "♛" : role === "lieutenant" ? "◆" : "✦"}</span>)}</div>
         <div className="seat-tokens">
-          <span>Gun <b>{player.guns}</b></span>
-          <button type="button" onClick={(event) => { event.stopPropagation(); adjustPlayerCounter(player.id, "guns", -1); }}>−</button>
-          <button type="button" onClick={(event) => { event.stopPropagation(); adjustPlayerCounter(player.id, "guns", 1); }}>+</button>
-          <span>Beer <b>{player.beer}</b></span>
+          <span title="Guns"><i>●</i><b>{player.guns}</b></span>
+          <span title="Beer"><i>◆</i><b>{player.beer}</b></span>
         </div>
         <div className="seat-status">
-          {player.offDuty && <span>OFF-DUTY</span>}
-          {player.silenced && <span>SILENCED</span>}
-          {player.searched && <span>SEARCHED</span>}
-          {player.flogged && <span>FLOGGED</span>}
-          {player.characterRevealed && <span>{CHARACTER_DEFINITIONS[player.characterId].name}</span>}
-          {game.mutinyLocked[player.id] && <span className="status-locked">LOCKED</span>}
-          {commitmentVisible && player.id !== game.captainId && <span className="status-reveal">{game.commitments[player.id] ?? 0} GUN</span>}
-          {game.reactionPassed[player.id] && <span>PASS</span>}
+          {player.offDuty && <span title="Off-Duty">×</span>}
+          {player.silenced && <span title="Silenced">✂</span>}
+          {player.searched && <span title="Cabin Searched">⌕</span>}
+          {player.flogged && <span title="Flogged">≋</span>}
+          {game.mutinyLocked[player.id] && <span title="Mutiny locked" className="status-locked">✓</span>}
+          {commitmentVisible && player.id !== game.captainId && <span title="Revealed Mutiny Guns" className="status-reveal">● {game.commitments[player.id] ?? 0}</span>}
+          {game.reactionPassed[player.id] && <span title="Passed reaction">PASS</span>}
         </div>
         <div className={`seat-character-card ${player.characterRevealed ? "is-revealed" : ""}`}>
-          <small>CHARACTER</small>
-          <b>{player.characterRevealed ? CHARACTER_DEFINITIONS[player.characterId].name : "FACE DOWN"}</b>
+          <small>{player.characterRevealed ? "REVEALED" : "♠"}</small>
+          <b>{player.characterRevealed ? CHARACTER_DEFINITIONS[player.characterId].name : "?"}</b>
         </div>
         <div className="seat-resume" aria-label={`${player.name} public portfolio`}>
-          {player.resume.length === 0 && <small>EMPTY PORTFOLIO</small>}
+          {player.resume.length === 0 && <small>—</small>}
           {player.resume.slice(-6).map((card) => <span className={`resume-card resume-card--${card.direction.toLowerCase()}`} title={card.name} key={card.id}>{card.direction[0]}</span>)}
         </div>
       </article>
@@ -832,7 +911,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       const locked = game.mutinyLocked[viewerId];
       return (
         <div className="phase-action-grid">
-          <div><h3>Secret contribution · {lockedCount}/{mutinyEligible.length} locked</h3><p>Only this phone sees the amount. The final lock opens all Guns simultaneously.</p></div>
+          <div><h3>Secret contribution · {lockedCount}/{mutinyEligible.length} locked</h3><p>Only this screen sees the amount. The final lock opens all Guns simultaneously.</p></div>
           {viewerId === game.captainId ? <div className="waiting-card">Captain cannot join this Mutiny.</div> : (
             <div className="mutiny-picker"><button onClick={() => adjustCommitment(-1)} disabled={locked}>−</button><strong>{locked ? "LOCKED" : mine}</strong><button onClick={() => adjustCommitment(1)} disabled={locked}>+</button>{locked ? <button onClick={unlockMutiny}>CHANGE</button> : <button onClick={lockMutiny}>LOCK GUNS</button>}</div>
           )}
@@ -879,7 +958,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
     );
 
     if (game.phase === "MAP_ACTION") return (
-      <div className="phase-action-grid"><div><h3>Open the crate on {game.shipHexId}</h3><p>{shipCell.action?.replaceAll("_", " ")} resolves before the Navigation Card effect. Only Captain may confirm.</p></div><select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Choose target…</option>{targetOptions.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select><button className="prototype-primary" disabled={viewerId !== game.captainId || !game.actionTargetId} onClick={resolveMapAction}>OPEN & RESOLVE CRATE</button></div>
+      <div className="phase-action-grid"><div><h3>{currentMapAction?.replaceAll("_", " ")}</h3><p>Captain chooses a target. The private result stays on the authorized screen.</p></div><select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Choose target…</option>{targetOptions.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select><button className="prototype-primary" disabled={(!correctionMode && viewerId !== game.captainId) || !game.actionTargetId} onClick={resolveMapAction}>CONFIRM</button></div>
     );
 
     if (game.phase === "CARD_EFFECT") {
@@ -891,8 +970,16 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
 
     if (game.phase === "RITUAL" && game.activeRitual) {
       const ritual = RITUAL_CARD_DEFINITIONS[game.activeRitual];
+      const cultCanAct = viewer.faction === "CULT_LEADER" || correctionMode;
+      const cultGunTotal = Object.values(game.cultGunAllocation).reduce((sum, value) => sum + value, 0);
       return (
-        <div className="phase-action-grid"><div><h3>{ritual.name}</h3><p>{ritual.publicPrompt}</p></div>{game.activeRitual === "CONVERSION" && viewer.faction === "CULT_LEADER" && <select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Cult Leader chooses privately…</option>{game.players.filter((player) => !player.eliminated && player.faction !== "CULT_LEADER" && player.faction !== "CULTIST").map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select>}<button className="prototype-primary" disabled={game.activeRitual === "CONVERSION" && (viewer.faction !== "CULT_LEADER" || !game.actionTargetId)} onClick={resolveRitual}>MARK RITUAL RESOLVED</button></div>
+        <div className="phase-action-grid">
+          <div><h3>{ritual.name}</h3><p>{ritual.publicPrompt}</p></div>
+          {game.activeRitual === "CONVERSION" && cultCanAct && <select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Choose privately…</option>{game.players.filter((player) => !player.eliminated && !player.searched && !player.flogged && player.faction !== "CULT_LEADER" && player.faction !== "CULTIST").map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select>}
+          {game.activeRitual === "CULT_GUNS_STASH" && cultCanAct && <div className="cult-gun-tool"><select value={game.actionTargetId ?? ""} onChange={(event) => setGame((current) => ({ ...current, actionTargetId: event.target.value || null }))}><option value="">Choose recipient…</option>{game.players.filter((player) => !player.eliminated).map((player) => <option key={player.id} value={player.id}>{player.name} · +{game.cultGunAllocation[player.id] ?? 0}</option>)}</select><button onClick={() => adjustCultGunAllocation(-1)}>−</button><b>{cultGunTotal}/3</b><button onClick={() => adjustCultGunAllocation(1)}>+</button></div>}
+          {!cultCanAct && <div className="waiting-card">Waiting for the Cult Leader…</div>}
+          <button className="prototype-primary" disabled={!cultCanAct || (game.activeRitual === "CONVERSION" && !game.actionTargetId) || (game.activeRitual === "CULT_GUNS_STASH" && cultGunTotal !== 3)} onClick={resolveRitual}>CONFIRM</button>
+        </div>
       );
     }
 
@@ -915,16 +1002,20 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
   const activeDrawOwnerId = activeDrawRole === "captain" ? game.captainId : activeDrawRole === "lieutenant" ? game.lieutenantId : null;
   const activeDrawHand = activeDrawRole === "captain" ? game.captainHand : activeDrawRole === "lieutenant" ? game.lieutenantHand : [];
   const canDrawNavigation = Boolean(activeDrawRole && activeDrawOwnerId === viewerId && activeDrawHand.length === 0);
+  const mapToolActive = (action: Exclude<HexCell["action"], null>) => game.phase === "MAP_ACTION" && currentMapAction === action;
+  const ritualToolActive = (ritual: RitualCardId) => game.phase === "RITUAL" && game.activeRitual === ritual;
+  const canUseMapTool = (action: Exclude<HexCell["action"], null>) => correctionMode || mapToolActive(action);
+  const canUseRitualTool = (ritual: RitualCardId) => correctionMode || ritualToolActive(ritual);
 
   return (
     <main className="prototype-shell">
       <header className="prototype-topbar">
-        <div className="prototype-brand"><span>☠</span><div><small>Feed the Kraken</small><strong>Assisted Tabletop Prototype</strong></div></div>
+        <div className="prototype-brand"><span>☠</span><div><small>Feed the Kraken</small><strong>The Long Journey</strong></div></div>
         <div className="phase-readout"><small>Round {game.round}</small><strong>{PHASE_LABELS[game.phase]}</strong></div>
-        <label className="viewer-switch"><span>Private phone</span><select value={viewerId} onChange={(event) => { setViewerId(event.target.value); setSelectedBadge(null); }}>{game.players.map((player) => <option value={player.id} key={player.id}>Seat {player.seat} · {player.name}</option>)}</select></label>
-        <button type="button" className={`correction-toggle ${correctionMode ? "is-active" : ""}`} onClick={() => setCorrectionMode((value) => !value)}>CORRECTION {correctionMode ? "ON" : "OFF"}</button>
-        <button type="button" className="prototype-ghost" onClick={onOpenWorkbench}>MAP AUDIT</button>
-        <button type="button" className="prototype-ghost" onClick={restartPrototype}>RESET DEMO</button>
+        <label className="viewer-switch"><span>DEV · VIEW AS SEAT</span><select value={viewerId} onChange={(event) => { setViewerId(event.target.value); setSelectedBadge(null); }}>{game.players.map((player) => <option value={player.id} key={player.id}>#{player.seat} · {player.name}</option>)}</select></label>
+        <button type="button" title="Enable manual corrections" aria-label="Correction mode" className={`correction-toggle icon-control ${correctionMode ? "is-active" : ""}`} onClick={() => setCorrectionMode((value) => !value)}><i>⚒</i><span>{correctionMode ? "EDIT ON" : "EDIT"}</span></button>
+        <button type="button" title="Open map audit" aria-label="Open map audit" className="prototype-ghost icon-control" onClick={onOpenWorkbench}><i>⌖</i><span>AUDIT</span></button>
+        <button type="button" title="Reset prototype" aria-label="Reset prototype" className="prototype-ghost icon-control" onClick={restartPrototype}><i>↻</i><span>RESET</span></button>
       </header>
 
       <section className="shared-object-rack" aria-label="Shared table objects">
@@ -937,6 +1028,21 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
         <button className={`table-object ${viewer.searched ? "is-on-mat" : ""}`} onClick={() => toggleViewerStatus("searched")}><i>⌕</i><span>SEARCHED</span><b>{viewer.searched ? "RETURN" : "TAKE"}</b></button>
         <button className={`table-object ${viewer.flogged ? "is-on-mat" : ""}`} onClick={() => toggleViewerStatus("flogged")}><i>≋</i><span>FLOGGED</span><b>{viewer.flogged ? "RETURN" : "TAKE"}</b></button>
       </section>
+
+      <nav className={`companion-action-bar ${toolsExpanded ? "is-expanded" : ""}`} aria-label="Companion actions">
+        <button className="companion-action-bar__toggle" type="button" onClick={() => setToolsExpanded((value) => !value)} title="Show or hide companion actions"><i>⚙</i><span>TABLE ACTIONS</span><b>{toolsExpanded ? "−" : "+"}</b></button>
+        {toolsExpanded && <div className="companion-action-bar__tools">
+          <CompanionTool icon="⌕" label="Cabin Search" active={mapToolActive("CABIN_SEARCH")} disabled={!canUseMapTool("CABIN_SEARCH")} onClick={() => openMapActionTool("CABIN_SEARCH")} />
+          <CompanionTool icon="≋" label="Flogging" active={mapToolActive("FLOGGING")} disabled={!canUseMapTool("FLOGGING")} onClick={() => openMapActionTool("FLOGGING")} />
+          <CompanionTool icon="✂" label="Cut Tongue" active={mapToolActive("OFF_WITH_THE_TONGUE")} disabled={!canUseMapTool("OFF_WITH_THE_TONGUE")} onClick={() => openMapActionTool("OFF_WITH_THE_TONGUE")} />
+          <CompanionTool icon="☠" label="Feed Kraken" active={mapToolActive("FEED_THE_KRAKEN")} disabled={!canUseMapTool("FEED_THE_KRAKEN")} onClick={() => openMapActionTool("FEED_THE_KRAKEN")} />
+          <CompanionTool icon="☽" label="Conversion" active={ritualToolActive("CONVERSION")} disabled={!canUseRitualTool("CONVERSION")} onClick={() => openRitualTool("CONVERSION")} />
+          <CompanionTool icon="⚔" label="Cult Guns" active={ritualToolActive("CULT_GUNS_STASH")} disabled={!canUseRitualTool("CULT_GUNS_STASH")} onClick={() => openRitualTool("CULT_GUNS_STASH")} />
+          <CompanionTool icon="◉" label="Cult Search" active={ritualToolActive("CULT_CABIN_SEARCH")} disabled={!canUseRitualTool("CULT_CABIN_SEARCH")} onClick={() => openRitualTool("CULT_CABIN_SEARCH")} />
+          <CompanionTool icon="↘" label="Jump Ship" active={game.phase === "NAVIGATOR_CHOOSE" && viewerId === game.navigatorId} disabled={game.phase !== "NAVIGATOR_CHOOSE" || viewerId !== game.navigatorId} onClick={jumpOverboard} />
+        </div>}
+        {correctionMode && <small>Correction mode: manually open any table action.</small>}
+      </nav>
 
       <section className="prototype-table">
         <aside className="player-rail player-rail--left">{leftPlayers.map(renderPlayer)}</aside>
@@ -993,10 +1099,10 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
 
       <section className="local-player-mat" aria-label={`${viewer.name} private player mat`}>
         <div className="local-player-mat__identity">
-          <small>YOUR TABLE · SEAT {viewer.seat}</small>
+          <small>YOUR TABLE · #{viewer.seat}</small>
           <strong>{viewer.name}</strong>
-          <button className="private-peek" type="button">PRIVATE · {viewer.faction.replaceAll("_", " ")}</button>
-          <div className="local-token-row"><span>GUNS <b>{viewer.guns}</b></span><span>BEER <b>{viewer.beer}</b></span>{viewer.offDuty && <i>OFF-DUTY</i>}{viewer.silenced && <i>SILENCED</i>}{viewer.searched && <i>SEARCHED</i>}{viewer.flogged && <i>FLOGGED</i>}</div>
+          <button className="private-peek" type="button"><i>◉</i> {viewer.faction.replaceAll("_", " ")}</button>
+          <div className="local-token-row"><span title="Guns">● <b>{viewer.guns}</b></span><span title="Beer">◆ <b>{viewer.beer}</b></span>{viewer.offDuty && <i title="Off-Duty">×</i>}{viewer.silenced && <i title="Silenced">✂</i>}{viewer.searched && <i title="Cabin Searched">⌕</i>}{viewer.flogged && <i title="Flogged">≋</i>}</div>
         </div>
 
         <div className={`character-text-card ${viewer.characterUsed ? "is-used" : ""}`}>
@@ -1011,16 +1117,16 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
         </div>
 
         <section className="local-phase-panel">
-          <header><span>CONTEXT ACTIONS</span><b>{PHASE_LABELS[game.phase]}</b></header>
+          <header><span>▶ ACTION</span><b>{PHASE_LABELS[game.phase]}</b></header>
           {phaseControls}
         </section>
 
         <div className="local-manual-tools">
-          <header><span>MANUAL OVERRIDE</span><small>Undo table mistakes</small></header>
-          <div className="manual-tokens"><button onClick={() => adjustPlayerCounter(viewer.id, "guns", -1)}>− GUN</button><button onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}>+ GUN</button><button onClick={() => adjustPlayerCounter(viewer.id, "beer", -1)}>− BEER</button><button onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}>+ BEER</button></div>
+          <header><span>⚒ TOKENS</span><small>Local correction</small></header>
+          <div className="manual-tokens"><button title="Return one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", -1)}>− ●</button><button title="Take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}>+ ●</button><button title="Return one Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", -1)}>− ◆</button><button title="Take one Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}>+ ◆</button></div>
         </div>
 
-        <section className="event-log"><header><span>TABLE LOG</span><b>{game.events.length}</b></header>{game.events.slice(0, 6).map((event) => <p className={`event--${event.tone}`} key={event.id}>{event.text}</p>)}</section>
+        <details className="event-log"><summary><span>☷ TABLE LOG</span><b>{game.events.length}</b></summary>{game.events.slice(0, 6).map((event) => <p className={`event--${event.tone}`} key={event.id}>{event.text}</p>)}</details>
       </section>
     </main>
   );
