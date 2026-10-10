@@ -832,9 +832,10 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
 
   const roleTray = (
     <div className="role-tray">
-      <Badge role="captain" selected={selectedBadge === "captain"} onPick={setSelectedBadge} />
-      <Badge role="lieutenant" selected={selectedBadge === "lieutenant"} onPick={setSelectedBadge} />
-      <Badge role="navigator" selected={selectedBadge === "navigator"} onPick={setSelectedBadge} />
+      {game.phase === "CAPTAIN_TRANSFER" && <Badge role="captain" selected={selectedBadge === "captain"} onPick={setSelectedBadge} />}
+      {!game.lieutenantId && <Badge role="lieutenant" selected={selectedBadge === "lieutenant"} onPick={setSelectedBadge} />}
+      {!game.navigatorId && <Badge role="navigator" selected={selectedBadge === "navigator"} onPick={setSelectedBadge} />}
+      {game.phase !== "CAPTAIN_TRANSFER" && game.lieutenantId && game.navigatorId && <span className="badge-tray-empty">BADGES ASSIGNED</span>}
     </div>
   );
 
@@ -914,7 +915,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
     );
 
     if (game.phase === "CAPTAIN_TRANSFER") return (
-      <div className="phase-action-grid"><div><h3>{playerName(game, game.pendingCaptainId)} won the Mutiny</h3><p>The old Captain passes the hat. Navigation badges return to the tray.</p></div><Badge role="captain" selected={selectedBadge === "captain"} onPick={setSelectedBadge} /><button className="prototype-primary" disabled={viewerId !== game.captainId} onClick={() => game.pendingCaptainId && assignBadge("captain", game.pendingCaptainId)}>PASS CAPTAIN HAT</button></div>
+      <div className="phase-action-grid"><div><h3>{playerName(game, game.pendingCaptainId)} won the Mutiny</h3><p>The Captain hat is waiting in the shared badge dock.</p></div><button className="prototype-primary" disabled={viewerId !== game.captainId} onClick={() => game.pendingCaptainId && assignBadge("captain", game.pendingCaptainId)}>PASS CAPTAIN HAT</button></div>
     );
 
     if (game.phase === "DISCUSSION") return (
@@ -986,6 +987,10 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
   const activeDrawOwnerId = activeDrawRole === "captain" ? game.captainId : activeDrawRole === "lieutenant" ? game.lieutenantId : null;
   const activeDrawHand = activeDrawRole === "captain" ? game.captainHand : activeDrawRole === "lieutenant" ? game.lieutenantHand : [];
   const canDrawNavigation = Boolean(activeDrawRole && activeDrawOwnerId === viewerId && activeDrawHand.length === 0);
+  const viewerRoles = roleFor(game, viewer.id);
+  const showingPrivateHand = (game.phase === "CAPTAIN_DRAW" && viewerId === game.captainId)
+    || (game.phase === "LIEUTENANT_DRAW" && viewerId === game.lieutenantId)
+    || (game.phase === "NAVIGATOR_CHOOSE" && viewerId === game.navigatorId);
   const mapToolActive = (action: Exclude<HexCell["action"], null>) => game.phase === "MAP_ACTION" && currentMapAction === action;
   const ritualToolActive = (ritual: RitualCardId) => game.phase === "RITUAL" && game.activeRitual === ritual;
   const canUseMapTool = (action: Exclude<HexCell["action"], null>) => correctionMode || mapToolActive(action);
@@ -1036,6 +1041,8 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <div className="prototype-map-frame">
             <CleanMap cells={longJourney.cells} activeId={game.selectedHexId} onSelect={(id) => setGame((current) => ({ ...current, selectedHexId: id }))} showArrows showLabels animate shipHexId={game.shipHexId} />
             {correctionMode && <button className="ship-correction" onClick={moveShipCorrection}>MOVE SHIP TO {game.selectedHexId}</button>}
+          </div>
+          <section className="board-object-dock" aria-label="Card decks and Captain's Logbook">
             <section className="card-zone card-zone--navigation" aria-label="Navigation deck">
               <header><span>NAVIGATION</span><b>{stats.deck}</b></header>
               <div className="deck-stack deck-stack--navigation"><i /><i /><strong>N</strong></div>
@@ -1069,7 +1076,7 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
               <header><span>USED RITUALS</span><b>{game.usedRituals.length}</b></header>
               <div className="used-ritual-list">{game.usedRituals.length ? game.usedRituals.map((id) => <span key={id}>{RITUAL_CARD_DEFINITIONS[id].name}</span>) : <small>EMPTY</small>}</div>
             </section>
-          </div>
+          </section>
         </section>
 
         <aside className="player-rail player-rail--right">
@@ -1083,6 +1090,10 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <strong>{viewer.name}</strong>
           <button className="private-peek" type="button"><i>◉</i> {viewer.faction.replaceAll("_", " ")}</button>
           <div className="local-token-row"><span title="Guns">● <b>{viewer.guns}</b></span><span title="Beer · Off-Duty">◆ <b>{viewer.beer}</b></span></div>
+          <div className="local-office-row">
+            {viewerRoles.map((role) => <span className={`owned-office owned-office--${role}`} key={role}><i>{role === "captain" ? "♛" : role === "lieutenant" ? "◆" : "✦"}</i><b>{role === "captain" ? "CAPTAIN HAT" : role.toUpperCase()}</b></span>)}
+            {!viewerRoles.length && <small>NO OFFICE</small>}
+          </div>
         </div>
 
         <div className={`character-text-card ${viewer.characterUsed ? "is-used" : ""}`}>
@@ -1096,8 +1107,8 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <p>Captain <b>{captain.name}</b></p><p>Lieutenant <b>{lieutenant?.name ?? "Unassigned"}</b></p><p>Navigator <b>{navigator?.name ?? "Unassigned"}</b></p>
         </div>
 
-        <section className="local-phase-panel">
-          <header><span>▶ ACTION</span><b>{PHASE_LABELS[game.phase]}</b></header>
+        <section className={`local-phase-panel ${showingPrivateHand ? "is-hand-zone" : ""}`}>
+          <header><span>{showingPrivateHand ? "🂠 YOUR PRIVATE HAND" : "▶ CURRENT ACTION"}</span><b>{PHASE_LABELS[game.phase]}</b></header>
           {phaseControls}
         </section>
 

@@ -47,13 +47,15 @@ The current player's bottom mat contains:
 - public Gun and Beer/Off-Duty counters
 - public résumé
 - officer summary
-- private hand or current phase action
+- physical Captain hat/Lieutenant/Navigator badge when that player holds the office
+- a clearly labelled private hand zone for drawn Navigation or Logbook cards
+- current contextual action when no private hand is active
 - manual `+/- Gun` and `+/- Beer` correction controls
 - collapsible event log
 
 ## Map and physical card zones
 
-Place the following as visible table objects around the map:
+Place the following as visible table objects in a dedicated dock outside the hex artwork. Decks and the Logbook must never cover the ship, a playable hex or a movement arrow:
 
 ### Navigation Deck
 
