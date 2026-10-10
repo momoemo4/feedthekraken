@@ -24,6 +24,8 @@ Status date: 2026-10-10. `TESTED` is added only after the command has actually p
 | Player action/undo design | DESIGNED / TESTED DATA | Central prompt policies define draft, undo, close, lock, and information-reveal boundaries; React controls and reducer commands remain TODO. |
 | 11-seat assisted tabletop prototype | IMPLEMENTED / LOCAL | Playable browser vertical slice for roles, Mutiny barriers, Navigation hands/Logbook, movement, card/Ritual phases, correction controls, and event history. Multiplayer server wiring remains TODO. |
 | Prototype Navigation/Ritual art wiring | IMPLEMENTED / TESTED / LOCAL | Navigation face/back crops use atlas v3 in private hands, Logbook, reveal, deck and Deep Sea; Ritual face crops use atlas v3 for active/used cards. HTML owns labels/tooltips, and local seat switching hides private card faces from non-owners. |
+| Responsive tabletop and Character presentation | IMPLEMENTED / TESTED / LOCAL | Five-zone private dock prevents action/token/log overlap on desktop and laptop breakpoints; the viewer's Gun supply is a prominent physical object with event/card −/+ controls; 22 original Character portraits use an atlas, while ability copy appears on hover or keyboard focus. |
+| Wooden tabletop objects | IMPLEMENTED / TESTED / LOCAL | Original hand-painted wooden atlas supplies a readable pirate tricorn Captain hat, Lieutenant and Navigator badges, flintlock Gun, Beer and ship pieces. Placeholder crown/diamond/star/dot glyphs were removed from the main ownership surfaces. |
 | Quick Journey | TODO / UNVERIFIED | Requires a clear reference image. |
 
 ## Milestone boundary
@@ -36,6 +38,8 @@ This repository implements Milestone 0 and the audit tooling portion of Mileston
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
 - Browser flow QA: Captain/Lieutenant private hands, hidden non-owner views, shuffled Navigator Logbook, public reveal, active Ritual, used Ritual pile, and atlas crop loading verified.
+- Responsive browser QA: 1280×720 and 1920×1080 reported zero body overflow; all five private-dock regions and rail Character cards stayed within their parents; Character ability focus reveal and Gun 3→2→3 adjustment passed.
+- Wooden-object browser QA: atlas URL/crop positions verified for shared supplies, seat tokens, mini officer markers, and the local Captain hat; the old Captain crown text node is absent.
 - Local client: HTTP 200.
 - Local API health: `{ "ok": true, "milestone": 1, "mapVerified": false }`.
 - `npm run simulate:8p`: 9-round deterministic game completed; public-secret leak audit passed.

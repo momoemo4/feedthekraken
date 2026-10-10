@@ -229,7 +229,6 @@ function roleFor(state: PrototypeState, id: string): BadgeRole[] {
 
 function Badge({ role, selected, onPick }: { role: BadgeRole; selected: boolean; onPick: (role: BadgeRole) => void }) {
   const labels: Record<BadgeRole, string> = { captain: "CAPTAIN", lieutenant: "LIEUTENANT", navigator: "NAVIGATOR" };
-  const icons: Record<BadgeRole, string> = { captain: "♛", lieutenant: "◆", navigator: "✦" };
   return (
     <button
       className={`role-badge role-badge--${role} ${selected ? "is-selected" : ""}`}
@@ -238,7 +237,7 @@ function Badge({ role, selected, onPick }: { role: BadgeRole; selected: boolean;
       onClick={() => onPick(role)}
       type="button"
     >
-      <span>{icons[role]}</span>{labels[role]}
+      <span className={`wood-piece wood-piece--${role}`} aria-hidden="true" />{labels[role]}
     </button>
   );
 }
@@ -279,6 +278,23 @@ function RitualCard({ ritualId, compact = false }: { ritualId: RitualCardId; com
       <span>RITUAL</span>
       <strong>{ritual.name}</strong>
     </article>
+  );
+}
+
+function CharacterPortrait({ characterId, hidden = false }: { characterId: CharacterId; hidden?: boolean }) {
+  const index = CHARACTER_IDS.indexOf(characterId);
+  const column = index % 6;
+  const row = Math.floor(index / 6);
+  const backgroundPosition = hidden
+    ? undefined
+    : `${column * 20}% ${row * (100 / 3)}%`;
+
+  return (
+    <span
+      className={`character-portrait ${hidden ? "is-hidden" : ""}`}
+      style={backgroundPosition ? { backgroundPosition } : undefined}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -912,19 +928,24 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
       >
         <div className="seat-avatar" aria-hidden="true">{player.name.slice(0, 1)}</div>
         <header><span>#{player.seat}</span><b>{player.name}</b><i title={player.connected ? "Connected" : "Disconnected"} className={player.connected ? "is-online" : ""} /></header>
-        <div className="seat-roles">{roles.map((role) => <span title={role} className={`mini-role mini-role--${role}`} key={role}>{role === "captain" ? "♛" : role === "lieutenant" ? "◆" : "✦"}</span>)}</div>
+        <div className="seat-roles">{roles.map((role) => <span title={role} className={`mini-role mini-role--${role}`} key={role}><i className={`wood-piece wood-piece--${role}`} aria-hidden="true" /></span>)}</div>
         <div className="seat-tokens">
-          <span title="Guns"><i>●</i><b>{player.guns}</b></span>
-          {player.beer > 0 && <span className="seat-beer-marker" title="Beer · Off-Duty"><i>◆</i><b>OFF DUTY</b></span>}
+          <span title="Guns"><i className="wood-piece wood-piece--gun" aria-hidden="true" /><b>{player.guns}</b></span>
+          {player.beer > 0 && <span className="seat-beer-marker" title="Beer · Off-Duty"><i className="wood-piece wood-piece--beer" aria-hidden="true" /><b>OFF DUTY</b></span>}
         </div>
         <div className="seat-status">
           {game.mutinyLocked[player.id] && <span title="Mutiny locked" className="status-locked">✓</span>}
           {commitmentVisible && player.id !== game.captainId && <span title="Revealed Mutiny Guns" className="status-reveal">● {game.commitments[player.id] ?? 0}</span>}
           {game.reactionPassed[player.id] && <span title="Passed reaction">PASS</span>}
         </div>
-        <div className={`seat-character-card ${player.characterRevealed ? "is-revealed" : ""}`}>
-          <small>{player.characterRevealed ? "REVEALED" : "♠"}</small>
-          <b>{player.characterRevealed ? CHARACTER_DEFINITIONS[player.characterId].name : "?"}</b>
+        <div
+          className={`seat-character-card ${player.characterRevealed ? "is-revealed" : ""}`}
+          title={player.characterRevealed ? CHARACTER_DEFINITIONS[player.characterId].description : "Face-down Character card"}
+          aria-label={player.characterRevealed ? `${CHARACTER_DEFINITIONS[player.characterId].name}, revealed Character` : "Face-down Character card"}
+        >
+          <CharacterPortrait characterId={player.characterId} hidden={!player.characterRevealed} />
+          <small>{player.characterRevealed ? "REVEALED" : "CHARACTER"}</small>
+          <b>{player.characterRevealed ? CHARACTER_DEFINITIONS[player.characterId].name : "HIDDEN"}</b>
         </div>
         <div className="seat-resume" aria-label={`${player.name} public portfolio`}>
           {player.resume.length === 0 && <small>—</small>}
@@ -1089,8 +1110,8 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
                 <div className="shared-role-slot">{roleTray}</div>
               </section>
               <div className={`edge-supplies ${beerSupplyRemaining === 0 ? "is-beer-empty" : ""}`}>
-                <button className="table-object table-object--gun" title="Take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}><i>●</i><span>GUNS</span><b>+1</b></button>
-                {beerSupplyRemaining > 0 && <button disabled={viewer.beer > 0} title={`${beerSupplyRemaining} Off-Duty Beer marker${beerSupplyRemaining === 1 ? "" : "s"} left`} className={`table-object table-object--beer ${viewer.beer > 0 ? "is-on-mat" : ""}`} onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}><i>◆</i><span>BEER</span><b>{beerSupplyRemaining} LEFT</b></button>}
+                <button className="table-object table-object--gun" title="Take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}><i className="wood-piece wood-piece--gun" aria-hidden="true" /><span>GUNS</span><b>+1</b></button>
+                {beerSupplyRemaining > 0 && <button disabled={viewer.beer > 0} title={`${beerSupplyRemaining} Off-Duty Beer marker${beerSupplyRemaining === 1 ? "" : "s"} left`} className={`table-object table-object--beer ${viewer.beer > 0 ? "is-on-mat" : ""}`} onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}><i className="wood-piece wood-piece--beer" aria-hidden="true" /><span>BEER</span><b>{beerSupplyRemaining} LEFT</b></button>}
               </div>
               <section className="card-zone card-zone--navigation" aria-label="Navigation deck">
               <header><span>NAVIGATION</span><b>{stats.deck}</b></header>
@@ -1156,7 +1177,16 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           <small>YOUR TABLE · #{viewer.seat}</small>
           <strong>{viewer.name}</strong>
           <button className="private-peek" type="button"><i>◉</i> {viewer.faction.replaceAll("_", " ")}</button>
-          <div className="local-token-row"><span title="Guns">● <b>{viewer.guns}</b></span>{viewer.beer > 0 && <span className="local-beer-marker" title="Beer · Off-Duty">◆ <b>OFF DUTY</b></span>}</div>
+          <div className="local-gun-display" title={`${viewer.guns} Guns on your table`} aria-label={`${viewer.guns} Guns on your table`}>
+            <i className="wood-piece wood-piece--gun" aria-hidden="true" />
+            <span>YOUR GUNS</span>
+            <div className="local-gun-stepper">
+              <button type="button" title="Lose or return one Gun after an event or card" aria-label="Lose or return one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", -1)}>−</button>
+              <b>{viewer.guns}</b>
+              <button type="button" title="Gain or take one Gun after an event or card" aria-label="Gain or take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}>+</button>
+            </div>
+          </div>
+          <div className="local-token-row">{viewer.beer > 0 && <span className="local-beer-marker" title="Beer · Off-Duty"><i className="wood-piece wood-piece--beer" aria-hidden="true" /><b>OFF DUTY</b></span>}</div>
           <div className="local-portfolio local-portfolio--compact">
             <header><span>PUBLIC PORTFOLIO</span><b>{viewer.resume.length}</b></header>
             <div>{viewer.resume.length ? viewer.resume.map((card) => <span className={`resume-card resume-card--${card.direction.toLowerCase()}`} title={card.name} key={card.id}>{card.direction[0]}</span>) : <small>No played cards yet</small>}</div>
@@ -1164,15 +1194,26 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           </div>
         </div>
 
-        <div className={`character-text-card ${viewer.characterUsed ? "is-used" : ""}`}>
-          <span>Character #{privateCharacter.number}</span><strong>{privateCharacter.name}</strong><small>{privateCharacter.timingLabel}</small><p>{privateCharacter.description}</p>
+        <div
+          className={`character-text-card character-art-card ${viewer.characterUsed ? "is-used" : ""}`}
+          tabIndex={0}
+          aria-describedby={`character-ability-${viewer.id}`}
+        >
+          <CharacterPortrait characterId={viewer.characterId} />
+          <span>Character #{privateCharacter.number}</span>
+          <strong>{privateCharacter.name}</strong>
+          <small className="character-art-card__hint">HOVER / FOCUS FOR ABILITY</small>
+          <div className="character-art-card__ability" id={`character-ability-${viewer.id}`} role="tooltip">
+            <small>{privateCharacter.timingLabel}</small>
+            <p>{privateCharacter.description}</p>
+          </div>
           <button type="button" disabled={viewer.characterUsed || !canControlViewer} onClick={toggleCharacter}>{viewer.characterUsed ? "USED" : "REVEAL / ACTIVATE"}</button>
         </div>
 
         <section className="local-office-display" aria-label="Your officer object">
           <header><span>YOUR OFFICER OBJECT</span><b>{viewerRoles.length ? "ON YOUR TABLE" : "NONE"}</b></header>
           <div className="local-office-row">
-            {viewerRoles.map((role) => <span className={`owned-office owned-office--${role}`} key={role}><i>{role === "captain" ? "♛" : role === "lieutenant" ? "◆" : "✦"}</i><b>{role === "captain" ? "CAPTAIN HAT" : `${role.toUpperCase()} BADGE`}</b></span>)}
+            {viewerRoles.map((role) => <span className={`owned-office owned-office--${role}`} key={role}><i className={`wood-piece wood-piece--${role}`} aria-hidden="true" /><b>{role === "captain" ? "CAPTAIN HAT" : `${role.toUpperCase()} BADGE`}</b></span>)}
             {!viewerRoles.length && <small>NO HAT OR BADGE</small>}
           </div>
         </section>
@@ -1182,12 +1223,14 @@ export function GamePrototype({ onOpenWorkbench }: { onOpenWorkbench: () => void
           {phaseControls}
         </section>
 
-        <div className="local-manual-tools">
-          <header><span>⚒ TOKENS</span><small>Local correction</small></header>
-          <div className="manual-tokens"><button title="Return one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", -1)}>− ●</button><button title="Take one Gun" onClick={() => adjustPlayerCounter(viewer.id, "guns", 1)}>+ ●</button><button disabled={viewer.beer === 0} title="Return Off-Duty Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", -1)}>− ◆</button><button disabled={viewer.beer > 0 || beerSupplyRemaining === 0} title="Take Off-Duty Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}>+ ◆</button></div>
-        </div>
+        <div className="local-utility-stack">
+          <div className="local-manual-tools">
+            <header><span>⚒ TOKENS</span><small>Local correction</small></header>
+            <div className="manual-tokens"><button disabled={viewer.beer === 0} title="Return Off-Duty Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", -1)}>− ◆</button><button disabled={viewer.beer > 0 || beerSupplyRemaining === 0} title="Take Off-Duty Beer" onClick={() => adjustPlayerCounter(viewer.id, "beer", 1)}>+ ◆</button></div>
+          </div>
 
-        <details className="event-log"><summary><span>☷ TABLE LOG</span><b>{game.events.length}</b></summary>{game.events.slice(0, 6).map((event) => <p className={`event--${event.tone}`} key={event.id}>{event.text}</p>)}</details>
+          <details className="event-log"><summary><span>☷ TABLE LOG</span><b>{game.events.length}</b></summary>{game.events.slice(0, 6).map((event) => <p className={`event--${event.tone}`} key={event.id}>{event.text}</p>)}</details>
+        </div>
       </section>
     </main>
   );

@@ -1559,3 +1559,354 @@ select { height: 28px; padding: 0 5px; margin-top: 4px; font-size: 9px; } select
   .local-phase-panel .nav-card__face > small { height: auto; font-size: 5px; }
   .local-phase-panel .ritual-card { width: 64px; }
 }
+
+/* Responsive player dock: art-first Characters, prominent Guns, and isolated utilities. */
+.character-portrait {
+  display: block;
+  background-color: #142625;
+  background-image: url('/art/components/character-portraits-atlas-v1.png');
+  background-repeat: no-repeat;
+  background-size: 600% 400%;
+}
+.character-portrait.is-hidden {
+  background-image:
+    radial-gradient(circle at 50% 42%, rgba(225,195,112,.18) 0 10%, transparent 11%),
+    repeating-linear-gradient(135deg, #15312f 0 7px, #0b2221 7px 14px);
+  background-size: auto;
+}
+
+.player-seat { padding-right: 12px; }
+.player-seat .seat-tokens,
+.player-seat .seat-status { padding-right: clamp(60px, 23%, 104px); }
+.seat-character-card {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  border-color: rgba(231,207,139,.4);
+  background: #0c2221;
+  box-shadow: 0 5px 14px rgba(0,0,0,.32);
+}
+.seat-character-card .character-portrait { position: absolute; inset: 0; }
+.seat-character-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(2,12,12,.9));
+  pointer-events: none;
+}
+.seat-character-card small,
+.seat-character-card b {
+  position: absolute;
+  z-index: 1;
+  right: 4px;
+  left: 4px;
+  overflow: hidden;
+  color: #f3e5bb;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px #000;
+  white-space: nowrap;
+}
+.seat-character-card small { bottom: 14px; }
+.seat-character-card b { bottom: 4px; }
+.seat-character-card.is-revealed { color: #f3e5bb; background: #122725; }
+
+.local-player-mat {
+  grid-template-columns:
+    clamp(180px, 12vw, 225px)
+    clamp(190px, 14vw, 265px)
+    clamp(155px, 11vw, 210px)
+    minmax(360px, 1fr)
+    clamp(142px, 10vw, 185px);
+}
+.local-gun-display {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  column-gap: 6px;
+  min-height: 48px;
+  margin-top: 7px;
+  padding: 4px 7px 4px 4px;
+  border: 1px solid rgba(231,204,126,.36);
+  background: linear-gradient(90deg, rgba(120,91,40,.25), rgba(9,31,30,.72));
+}
+.local-gun-display i {
+  grid-row: 1 / 3;
+  width: 40px;
+  height: 40px;
+  background-image: url('/art/components/physical-components-atlas.png');
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+  background-size: 300% 300%;
+}
+.local-gun-display span {
+  align-self: end;
+  color: #c4b98f;
+  font: 800 clamp(7px, .36vw, 9px) "DM Mono", monospace;
+  letter-spacing: .05em;
+}
+.local-gun-display b {
+  color: #f1d16f;
+  font: 800 clamp(22px, 1.15vw, 28px) "DM Mono", monospace;
+}
+.local-gun-stepper {
+  display: grid;
+  grid-template-columns: 24px minmax(24px, 1fr) 24px;
+  align-items: center;
+  gap: 3px;
+}
+.local-gun-stepper b { text-align: center; line-height: 1; }
+.local-gun-stepper button {
+  width: 24px;
+  height: 23px;
+  padding: 0;
+  border: 1px solid rgba(232,207,137,.34);
+  color: #f1d16f;
+  background: rgba(2,16,16,.68);
+  font: 800 14px "DM Mono", monospace;
+  cursor: pointer;
+}
+.local-gun-stepper button:hover,
+.local-gun-stepper button:focus-visible { border-color: #efd47d; background: rgba(226,198,112,.14); outline: none; }
+.local-player-mat__identity .local-token-row:empty { display: none; }
+
+.local-player-mat .character-art-card {
+  position: relative;
+  min-height: 0;
+  padding: 12px 12px 50px;
+  overflow: hidden;
+  isolation: isolate;
+  outline: none;
+}
+.character-art-card > .character-portrait { position: absolute; z-index: -2; inset: 0; }
+.character-art-card::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(3,14,14,.18), rgba(3,14,14,.16) 35%, rgba(3,14,14,.96) 76%);
+}
+.character-art-card > span,
+.character-art-card > strong,
+.character-art-card > small { position: relative; z-index: 1; text-shadow: 0 1px 4px #000; }
+.character-art-card > strong {
+  position: absolute;
+  right: 11px;
+  bottom: 54px;
+  left: 11px;
+  color: #fff0c4;
+  font-size: clamp(17px, .9vw, 23px);
+}
+.character-art-card__hint {
+  position: absolute !important;
+  right: 11px;
+  bottom: 42px;
+  left: 11px;
+  color: #cbbf9a !important;
+  font-size: 7px !important;
+}
+.character-art-card__ability {
+  position: absolute;
+  z-index: 4;
+  inset: 8px 8px 45px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px;
+  opacity: 0;
+  visibility: hidden;
+  border: 1px solid rgba(235,210,143,.5);
+  background: rgba(4,20,20,.95);
+  box-shadow: 0 10px 24px rgba(0,0,0,.5);
+  transition: opacity .16s ease, visibility .16s ease;
+}
+.character-art-card__ability small { color: #efcf78; }
+.character-art-card__ability p {
+  max-height: none;
+  margin: 7px 0 0;
+  overflow: auto;
+  color: #d2d7cd;
+  font-size: clamp(8px, .42vw, 10px);
+  line-height: 1.35;
+}
+.character-art-card:hover .character-art-card__ability,
+.character-art-card:focus .character-art-card__ability,
+.character-art-card:focus-within .character-art-card__ability { opacity: 1; visibility: visible; }
+.character-art-card:hover .character-art-card__hint,
+.character-art-card:focus .character-art-card__hint,
+.character-art-card:focus-within .character-art-card__hint { opacity: 0; }
+.local-player-mat .character-art-card > button { z-index: 5; }
+
+.local-phase-panel { min-width: 0; overflow: hidden; }
+.local-phase-panel .phase-action-grid {
+  min-width: 0;
+  flex-wrap: wrap;
+  align-content: center;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.local-phase-panel .phase-action-grid > * { min-width: 0; max-width: 100%; }
+.local-phase-panel .phase-action-grid > div:first-child { flex: 0 1 190px; }
+.local-phase-panel .phase-action-grid p { display: none; }
+.local-phase-panel .revealed-contributions {
+  flex: 1 1 320px !important;
+  max-width: none;
+  max-height: 105px;
+  overflow: auto;
+}
+.local-phase-panel .phase-action-grid select { min-width: 150px; max-width: 240px; }
+.local-phase-panel .phase-action-grid button { flex: 0 1 auto; }
+
+.local-utility-stack {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 7px;
+  overflow: hidden;
+  border: 0 !important;
+  background: transparent !important;
+}
+.local-utility-stack > * { min-width: 0; }
+.local-utility-stack .local-manual-tools { overflow: hidden; }
+.local-utility-stack .event-log { width: 100%; max-height: 100%; }
+
+@media (max-width: 1600px) {
+  .local-player-mat {
+    grid-template-columns: 170px 205px 160px minmax(330px, 1fr) 145px;
+  }
+  .player-seat { padding-right: 8px; }
+  .player-seat .seat-tokens,
+  .player-seat .seat-status { padding-right: 64px; }
+  .seat-character-card { right: 7px; width: 58px; }
+}
+
+@media (max-width: 1366px) {
+  .prototype-topbar { grid-template-columns: minmax(225px, 1fr) 205px 225px 78px 78px 78px; gap: 7px; padding-right: 8px; padding-left: 8px; }
+  .prototype-table { grid-template-columns: 205px minmax(0, 1fr) 205px; gap: 7px; padding-right: 7px; padding-left: 7px; }
+  .map-edge-dock { width: 154px; }
+  .local-player-mat {
+    grid-template-columns: 158px 190px 145px minmax(315px, 1fr) 135px;
+    gap: 6px;
+    padding-right: 7px;
+    padding-left: 7px;
+  }
+  .player-seat { padding-left: 49px; }
+  .seat-avatar { left: 8px; width: 34px; height: 34px; }
+  .player-seat header { grid-template-columns: 22px 1fr auto; gap: 4px; }
+  .player-seat header b { font-size: 15px; }
+  .seat-roles { left: 10px; }
+  .local-phase-panel .phase-action-grid > div:first-child { flex-basis: 145px; }
+  .local-phase-panel .revealed-contributions { flex-basis: 250px !important; }
+}
+
+@media (max-height: 900px) {
+  .seat-character-card { top: 33px; height: 48px; }
+  .local-gun-display { min-height: 39px; margin-top: 4px; }
+  .local-gun-display i { width: 32px; height: 32px; }
+  .local-player-mat .character-art-card { padding: 8px 8px 42px; }
+  .character-art-card > strong { right: 8px; bottom: 45px; left: 8px; font-size: 17px; }
+  .character-art-card__hint { right: 8px; bottom: 35px; left: 8px; font-size: 6px !important; }
+  .character-art-card__ability { inset: 6px 6px 39px; padding: 8px; }
+  .local-utility-stack { gap: 5px; }
+  .local-utility-stack .local-manual-tools { padding: 6px; }
+  .local-utility-stack .local-manual-tools .manual-tokens { margin-top: 5px; gap: 4px; }
+  .local-utility-stack .local-manual-tools .manual-tokens button { height: 27px; }
+}
+
+@media (max-height: 760px) {
+  .prototype-shell { grid-template-rows: 50px minmax(0, 1fr) 172px; }
+  .prototype-topbar { height: 50px; }
+  .local-player-mat { padding-top: 6px; padding-bottom: 6px; }
+  .local-player-mat__identity { padding: 6px; }
+  .local-player-mat__identity strong { font-size: 16px; }
+  .private-peek { min-height: 27px; margin-top: 4px; }
+  .local-gun-display { min-height: 34px; }
+  .local-gun-display i { width: 28px; height: 28px; }
+  .local-portfolio--compact { display: none; }
+}
+
+/* Original hand-painted wooden objects. The atlas is 3 columns × 2 rows. */
+.wood-piece {
+  display: block;
+  flex: 0 0 auto;
+  padding: 0 !important;
+  border: 0;
+  background-color: #0d2b2c !important;
+  background-image: url('/art/components/wooden-game-pieces-atlas-v1.png') !important;
+  background-repeat: no-repeat !important;
+  background-size: 300% 200% !important;
+  box-shadow: none;
+  font-size: 0 !important;
+}
+.wood-piece--captain { background-position: 0 0 !important; }
+.wood-piece--lieutenant { background-position: 50% 0 !important; }
+.wood-piece--navigator { background-position: 100% 0 !important; }
+.wood-piece--gun { background-position: 0 100% !important; }
+.wood-piece--beer { background-position: 50% 100% !important; }
+.wood-piece--ship { background-position: 100% 100% !important; }
+
+.role-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.role-badge > .wood-piece {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  border-radius: 4px;
+}
+.mini-role {
+  padding: 0;
+  overflow: hidden;
+  background: #0d2929;
+}
+.mini-role > .wood-piece { width: 100%; height: 100%; }
+
+.seat-tokens span > .wood-piece {
+  width: 29px;
+  height: 29px;
+  border-radius: 3px;
+}
+.seat-beer-marker > .wood-piece { width: 29px; height: 29px; }
+.edge-supplies .table-object i.wood-piece {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 5px;
+}
+.table-object--gun i.wood-piece,
+.table-object--beer i.wood-piece { color: transparent; }
+
+.owned-office i.wood-piece,
+.owned-office--captain i.wood-piece,
+.owned-office--lieutenant i.wood-piece,
+.owned-office--navigator i.wood-piece {
+  border-radius: 7px;
+  background-color: #0d2b2c !important;
+  background-image: url('/art/components/wooden-game-pieces-atlas-v1.png') !important;
+  background-size: 300% 200% !important;
+}
+.local-office-display .owned-office i.wood-piece { border-radius: 9px; }
+
+.local-gun-display > i.wood-piece {
+  width: 40px;
+  height: 40px;
+  background-image: url('/art/components/wooden-game-pieces-atlas-v1.png') !important;
+  background-position: 0 100% !important;
+  background-size: 300% 200% !important;
+}
+.local-beer-marker {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+}
+.local-beer-marker > .wood-piece { width: 25px; height: 25px; border-radius: 3px; }
+
+@media (max-height: 900px) {
+  .role-badge > .wood-piece { width: 28px; height: 28px; }
+  .edge-supplies .table-object i.wood-piece { width: 32px; height: 32px; }
+  .seat-tokens span > .wood-piece { width: 23px; height: 23px; }
+  .local-gun-display > i.wood-piece { width: 32px; height: 32px; }
+}
